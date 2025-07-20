@@ -7,7 +7,8 @@ void setupDadosExemplo(
     std::vector<Professor>& profs, std::vector<Disciplina>& discs,
     std::vector<Turma>& turmas, std::vector<Sala>& salas,
     std::vector<RequisicaoAlocacao>& reqs,
-    std::set<std::tuple<int, int, int>>& disponibilidade) {
+    std::set<std::tuple<int, int, int>>& disponibilidade,
+    std::map<int, int>& turmaSalaMap) {  // NOVO: mapa turma-sala
 
     // --- Mapeamento de Strings para IDs ---
     std::map<std::string, int> mapaIdDias = { {"Segunda", 0}, {"Terça", 1}, {"Quarta", 2}, {"Quinta", 3}, {"Sexta", 4} };
@@ -21,11 +22,8 @@ void setupDadosExemplo(
     // --- Dados Brutos (como você forneceu) ---
     const std::vector<std::string> turmasNomes = { "6º Ano", "7º Ano", "8º Ano", "9º Ano" };
 
-    // (Estruturas de disciplinas e professores definidas abaixo para clareza)
-
     // --- Processamento ---
 
-    // ** FIX: idCounter must be declared **
     int idCounter = 1;
 
     // 1. Processar Turmas
@@ -69,17 +67,17 @@ void setupDadosExemplo(
     std::vector<ProfData> professoresData = {
         {"Adilson", {"História"}, {{"Quarta", "7:30-8:15"}, {"Quarta", "8:15-9:00"}, {"Quarta", "9:00-9:45"}, {"Quarta", "10:05-10:50"},{"Quarta", "10:50-11:35"},{"Quarta", "11:35-12:20"}, {"Sexta", "7:30-8:15"}, {"Sexta", "8:15-9:00"}, {"Sexta", "9:00-9:45"}, {"Sexta", "10:05-10:50"},{"Sexta", "10:50-11:35"},{"Sexta", "11:35-12:20"}}},
         {"Alexandra", {"Artes"}, {{"Segunda", "7:30-8:15"}, {"Segunda", "8:15-9:00"}, {"Segunda", "9:00-9:45"}, {"Segunda", "10:05-10:50"}}},
-        {"Ana Rosa", {"Geografia"}, {{"Segunda", "7:30-8:15"}, {"Segunda", "8:15-9:00"}, {"Segunda", "9:00-9:45"}, {"Segunda", "10:05-10:50"},{"Segunda", "10:50-11:35"},{"Segunda", "11:35-12:20"}, {"Terça", "7:30-8:15"}, {"Terça", "8:15-9:00"}, {"Terça", "9:00-9:45"}, {"Terça", "10:05-10:50"},{"Terça", "10:50-11:35"},{"Terça", "11:35-12:20"}, {"Quarta", "7:30-8:15"}, {"Quarta", "8:15-9:00"}, {"Quarta", "9:00-9:45"}, {"Quarta", "10:05-10:50"},{"Quarta", "10:50-11:35"},{"Quarta", "11:35-12:20"}, {"Quinta", "7:30-8:15"}, {"Quinta", "8:15-9:00"}, {"Quinta", "9:00-9:45"}, {"Quinta", "10:05-10:50"},{"Quinta", "10:50-11:35"},{"Quinta", "11:35-12:20"} ,{"Sexta", "7:30-8:15"}, {"Sexta", "8:15-9:00"}, {"Sexta", "9:00-9:45"}, {"Sexta", "10:05-10:50"},{"Sexta", "10:50-11:35"},{"Sexta", "11:35-12:20"}}},
+        {"Ana Rosa", {"Geografia"}, {{"Terça", "7:30-8:15"}, {"Terça", "8:15-9:00"}, {"Terça", "9:00-9:45"}, {"Terça", "10:05-10:50"},{"Terça", "10:50-11:35"},{"Terça", "11:35-12:20"}, {"Quarta", "7:30-8:15"}, {"Quarta", "8:15-9:00"}, {"Quarta", "9:00-9:45"}, {"Quarta", "10:05-10:50"},{"Quarta", "10:50-11:35"},{"Quarta", "11:35-12:20"}}},
         {"Bianca", {"Espanhol"}, {{"Segunda", "10:50-11:35"},{"Segunda", "11:35-12:20"}, {"Quinta", "10:50-11:35"},{"Quinta", "11:35-12:20"}}},
         {"Denise", {"Inglês"},{{"Segunda", "9:00-9:45"}, {"Segunda", "10:05-10:50"},{"Segunda", "10:50-11:35"},{"Segunda", "11:35-12:20"}, {"Quarta", "9:00-9:45"}, {"Quarta", "10:05-10:50"},{"Quarta", "10:50-11:35"},{"Quarta", "11:35-12:20"}}},
         {"Camila R.", {"Educ. Socioemocional"}, { {"Terça", "9:00-9:45"}, {"Terça", "10:05-10:50"},{"Terça", "10:50-11:35"},{"Terça", "11:35-12:20"}}},
         {"Wanderlei", {"Matemática"}, {{"Segunda", "7:30-8:15"}, {"Segunda", "8:15-9:00"}, {"Segunda", "9:00-9:45"}, {"Segunda", "10:05-10:50"},{"Segunda", "10:50-11:35"},{"Segunda", "11:35-12:20"}, {"Terça", "7:30-8:15"}, {"Terça", "8:15-9:00"}, {"Terça", "9:00-9:45"}, {"Terça", "10:05-10:50"},{"Terça", "10:50-11:35"},{"Terça", "11:35-12:20"}, {"Quarta", "7:30-8:15"}, {"Quarta", "8:15-9:00"}, {"Quarta", "9:00-9:45"}, {"Quarta", "10:05-10:50"},{"Quarta", "10:50-11:35"},{"Quarta", "11:35-12:20"}, {"Quinta", "7:30-8:15"}, {"Quinta", "8:15-9:00"}, {"Quinta", "9:00-9:45"}, {"Quinta", "10:05-10:50"},{"Quinta", "10:50-11:35"},{"Quinta", "11:35-12:20"} ,{"Sexta", "7:30-8:15"}, {"Sexta", "8:15-9:00"}, {"Sexta", "9:00-9:45"}, {"Sexta", "10:05-10:50"},{"Sexta", "10:50-11:35"},{"Sexta", "11:35-12:20"}}},
-        {"Elizangela", {"Prod. Texto"}, {{"Segunda", "7:30-8:15"}, {"Segunda", "8:15-9:00"}, {"Segunda", "9:00-9:45"}, {"Segunda", "10:05-10:50"},{"Segunda", "10:50-11:35"},{"Segunda", "11:35-12:20"}, {"Terça", "7:30-8:15"}, {"Terça", "8:15-9:00"}, {"Terça", "9:00-9:45"}, {"Terça", "10:05-10:50"},{"Terça", "10:50-11:35"},{"Terça", "11:35-12:20"}, {"Quarta", "7:30-8:15"}, {"Quarta", "8:15-9:00"}, {"Quarta", "9:00-9:45"}, {"Quarta", "10:05-10:50"},{"Quarta", "10:50-11:35"},{"Quarta", "11:35-12:20"}, {"Quinta", "7:30-8:15"}, {"Quinta", "8:15-9:00"}, {"Quinta", "9:00-9:45"}, {"Quinta", "10:05-10:50"},{"Quinta", "10:50-11:35"},{"Quinta", "11:35-12:20"} ,{"Sexta", "7:30-8:15"}, {"Sexta", "8:15-9:00"}, {"Sexta", "9:00-9:45"}, {"Sexta", "10:05-10:50"},{"Sexta", "10:50-11:35"},{"Sexta", "11:35-12:20"}}},
-        {"Jéssica", {"Ciências"}, {{"Segunda", "7:30-8:15"}, {"Segunda", "8:15-9:00"}, {"Segunda", "9:00-9:45"}, {"Segunda", "10:05-10:50"},{"Segunda", "10:50-11:35"},{"Segunda", "11:35-12:20"}, {"Terça", "7:30-8:15"}, {"Terça", "8:15-9:00"}, {"Terça", "9:00-9:45"}, {"Terça", "10:05-10:50"},{"Terça", "10:50-11:35"},{"Terça", "11:35-12:20"}, {"Quarta", "7:30-8:15"}, {"Quarta", "8:15-9:00"}, {"Quarta", "9:00-9:45"}, {"Quarta", "10:05-10:50"},{"Quarta", "10:50-11:35"},{"Quarta", "11:35-12:20"}, {"Quinta", "7:30-8:15"}, {"Quinta", "8:15-9:00"}, {"Quinta", "9:00-9:45"}, {"Quinta", "10:05-10:50"},{"Quinta", "10:50-11:35"},{"Quinta", "11:35-12:20"} ,{"Sexta", "7:30-8:15"}, {"Sexta", "8:15-9:00"}, {"Sexta", "9:00-9:45"}, {"Sexta", "10:05-10:50"},{"Sexta", "10:50-11:35"},{"Sexta", "11:35-12:20"}}},
+        {"Elizangela", {"Prod. Texto"}, {{"Quinta", "7:30-8:15"}, {"Quinta", "8:15-9:00"}, {"Quinta", "9:00-9:45"}, {"Quinta", "10:05-10:50"},{"Quinta", "10:50-11:35"},{"Quinta", "11:35-12:20"} ,{"Sexta", "7:30-8:15"}, {"Sexta", "8:15-9:00"}, {"Sexta", "9:00-9:45"}, {"Sexta", "10:05-10:50"},{"Sexta", "10:50-11:35"},{"Sexta", "11:35-12:20"}}},
+        {"Jéssica", {"Ciências"}, {{"Segunda", "7:30-8:15"}, {"Segunda", "8:15-9:00"}, {"Segunda", "9:00-9:45"}, {"Segunda", "10:05-10:50"},{"Segunda", "10:50-11:35"},{"Segunda", "11:35-12:20"},{"Sexta", "7:30-8:15"}, {"Sexta", "8:15-9:00"}, {"Sexta", "9:00-9:45"}, {"Sexta", "10:05-10:50"},{"Sexta", "10:50-11:35"},{"Sexta", "11:35-12:20"}}},
         {"Kátia", {"Musíca"}, {{"Terça", "11:35-12:20"}, {"Sexta", "10:05-10:50"}, {"Sexta", "10:50-11:35"}, {"Sexta", "11:35-12:20"}}},
         {"Neto", {"Educ. Física"}, {{"Terça", "10:50-11:35"}, {"Terça", "11:35-12:20"}, {"Quinta", "10:50-11:35"}, {"Quinta", "11:35-12:20"}}},
         {"Ronaldo", {"Robótica"}, {{"Quinta", "7:30-8:15"}, {"Quinta", "8:15-9:00"}, {"Quinta", "9:00-9:45"}, {"Quinta", "10:05-10:50"}}},
-        {"Selma", {"Ling. Port."}, {{"Segunda", "7:30-8:15"}, {"Segunda", "8:15-9:00"}, {"Segunda", "9:00-9:45"}, {"Segunda", "10:05-10:50"},{"Segunda", "10:50-11:35"},{"Segunda", "11:35-12:20"}, {"Terça", "7:30-8:15"}, {"Terça", "8:15-9:00"}, {"Terça", "9:00-9:45"}, {"Terça", "10:05-10:50"},{"Terça", "10:50-11:35"},{"Terça", "11:35-12:20"}, {"Quarta", "7:30-8:15"}, {"Quarta", "8:15-9:00"}, {"Quarta", "9:00-9:45"}, {"Quarta", "10:05-10:50"},{"Quarta", "10:50-11:35"},{"Quarta", "11:35-12:20"}, {"Quinta", "7:30-8:15"}, {"Quinta", "8:15-9:00"}, {"Quinta", "9:00-9:45"}, {"Quinta", "10:05-10:50"},{"Quinta", "10:50-11:35"},{"Quinta", "11:35-12:20"} ,{"Sexta", "7:30-8:15"}, {"Sexta", "8:15-9:00"}, {"Sexta", "9:00-9:45"}, {"Sexta", "10:05-10:50"},{"Sexta", "10:50-11:35"},{"Sexta", "11:35-12:20"}}}
+        {"Selma", {"Ling. Port."}, {{"Segunda", "7:30-8:15"}, {"Segunda", "8:15-9:00"}, {"Segunda", "9:00-9:45"}, {"Segunda", "10:05-10:50"},{"Segunda", "10:50-11:35"},{"Segunda", "11:35-12:20"}, {"Terça", "7:30-8:15"}, {"Terça", "8:15-9:00"}, {"Terça", "9:00-9:45"}, {"Terça", "10:05-10:50"},{"Terça", "10:50-11:35"},{"Terça", "11:35-12:20"}, {"Quarta", "7:30-8:15"}, {"Quarta", "8:15-9:00"}, {"Quarta", "9:00-9:45"}, {"Quarta", "10:05-10:50"},{"Quarta", "10:50-11:35"},{"Quarta", "11:35-12:20"}, {"Quinta", "7:30-8:15"}, {"Quinta", "8:15-9:00"}, {"Quinta", "9:00-9:45"}, {"Quinta", "10:05-10:50"},{"Quinta", "10:50-11:35"},{"Quinta", "11:35-12:20"} }}
     };
 
     idCounter = 201;
@@ -92,41 +90,62 @@ void setupDadosExemplo(
         }
     }
 
-    // 4. Gerar Requisições (** THIS ENTIRE BLOCK IS CORRECTED **)
+    // 4. Adicionar Salas
+    salas = { {501, "Sala 6º Ano", false}, {502, "Sala 7º Ano", false},
+              {503, "Sala 8º Ano", false}, {504, "Sala 9º Ano", false},
+              {505, "Quadra", true}, {506, "Lab", true} };
+
+    // Associar cada turma à sua sala específica
+    turmaSalaMap[mapaIdTurmas["6º Ano"]] = 501;
+    turmaSalaMap[mapaIdTurmas["7º Ano"]] = 502;
+    turmaSalaMap[mapaIdTurmas["8º Ano"]] = 503;
+    turmaSalaMap[mapaIdTurmas["9º Ano"]] = 504;
+
+    // 5. Gerar Requisições
     for (const auto& discPair : disciplinasData) {
         std::string nomeDisciplina = discPair.first;
         int idDisciplina = mapaIdDisciplinas[nomeDisciplina];
 
         // Encontrar o professor para esta disciplina
+        int idProfessor = -1;
         for (const auto& profData : professoresData) {
-            for (const auto& discProf : profData.disciplinas) {
-                if (discProf == nomeDisciplina) {
-                    int idProfessor = mapaIdProfessores[profData.nome];
+            // Cada professor tem apenas uma disciplina em sua lista
+            if (!profData.disciplinas.empty() && profData.disciplinas[0] == nomeDisciplina) {
+                idProfessor = mapaIdProfessores[profData.nome];
+                break;
+            }
+        }
 
-                    // Criar requisições para cada turma
-                    for (const auto& turmaPair : discPair.second) {
-                        int idTurma = mapaIdTurmas[turmaPair.first];
-                        int aulasNecessarias = turmaPair.second;
+        if (idProfessor == -1) {
+            std::cerr << "ERRO: Nao foi encontrado professor para a disciplina " << nomeDisciplina << std::endl;
+            continue;
+        }
 
-                        // Cria uma requisição para CADA AULA necessária
-                        for (int i = 0; i < aulasNecessarias; ++i) {
-                            reqs.push_back({ idTurma, idDisciplina, idProfessor, 1.0, false });
-                        }
-                    }
-                    break;
-                }
+        // Criar requisições para cada turma
+        for (const auto& turmaPair : discPair.second) {
+            int idTurma = mapaIdTurmas[turmaPair.first];
+            int aulasNecessarias = turmaPair.second;
+
+            // Cria uma requisição para CADA AULA necessária
+            for (int i = 0; i < aulasNecessarias; ++i) {
+                // Como não há preferências, todos têm o mesmo custo (0.0)
+                reqs.push_back({ idTurma, idDisciplina, idProfessor, 0.0, false });
             }
         }
     }
 
-    // 5. Adicionar Salas
-    salas = { {501, "Sala 1", false}, {502, "Sala 2", false}, {503, "Sala 3", false},
-              {504, "Sala 4", false}, {505, "Quadra", true}, {506, "Lab", true} };
+    // Mostra resumo dos dados carregados
+    std::cout << "\n=== DADOS CARREGADOS ===" << std::endl;
+    std::cout << "Turmas: " << turmas.size() << std::endl;
+    std::cout << "Disciplinas: " << discs.size() << std::endl;
+    std::cout << "Professores: " << profs.size() << std::endl;
+    std::cout << "Salas: " << salas.size() << std::endl;
+    std::cout << "Total de aulas a alocar: " << reqs.size() << std::endl;
 }
 
 
 int main() {
-    // 2. Mudar a página de código do console para UTF-8
+    // Mudar a página de código do console para UTF-8
     SetConsoleOutputCP(CP_UTF8);
     // Para garantir que o buffer de saída também funcione corretamente com UTF-8
     setvbuf(stdout, nullptr, _IOFBF, 1000);
@@ -137,9 +156,11 @@ int main() {
     std::vector<Sala> salas;
     std::vector<RequisicaoAlocacao> requisicoes;
     std::set<std::tuple<int, int, int>> disponibilidade;
+    std::map<int, int> turmaSalaMap;  // NOVO: mapa turma-sala
 
-    setupDadosExemplo(professores, disciplinas, turmas, salas, requisicoes, disponibilidade);
+    setupDadosExemplo(professores, disciplinas, turmas, salas, requisicoes, disponibilidade, turmaSalaMap);
 
+    // Calcula disponibilidade total de cada professor
     std::map<int, int> disponibilidadeTotalProf;
     for (const auto& p : professores) {
         disponibilidadeTotalProf[p.id] = 0;
@@ -148,67 +169,114 @@ int main() {
         disponibilidadeTotalProf[std::get<0>(disp)]++;
     }
 
-       GeradorHorario gerador(professores, disciplinas, turmas, salas, requisicoes, disponibilidade, disponibilidadeTotalProf);
+    // Passa o mapa turma-sala para o gerador
+    GeradorHorario gerador(professores, disciplinas, turmas, salas, requisicoes,
+                          disponibilidade, disponibilidadeTotalProf, turmaSalaMap);
 
     const int MAX_TENTATIVAS = 100000;
     bool sucesso = false;
+    int tentativasRealizadas = 0;
+
+    auto start = std::chrono::high_resolution_clock::now();
 
     for (int tentativa = 1; tentativa <= MAX_TENTATIVAS; ++tentativa) {
-        std::cout << "================== TENTATIVA NUMERO " << tentativa << " ==================" << std::endl;
+        tentativasRealizadas = tentativa;
+        std::cout << "\n================== TENTATIVA NUMERO " << tentativa << " ==================" << std::endl;
 
         // Se a construção terminou sem falha crítica, vamos verificar o resultado
         if (gerador.gerarHorario()) {
 
-            std::cout << "Verificando a integridade da grade gerada..." << std::endl;
+            std::cout << "\nVerificando a integridade da grade gerada..." << std::endl;
             std::vector<Aula> gradeResultante = gerador.getGradeHoraria();
-            bool gradeValida = true;
 
             // VERIFICAÇÃO EXTERNA
-            for (const auto& req : requisicoes) {
-                int aulasRequeridas = 0;
-                // Acessa o mapa de disciplinas para pegar a carga horária correta
-                for(const auto& disc : disciplinas) {
-                    if (disc.id == req.idDisciplina) {
-                        aulasRequeridas = disc.aulasPorTurma.at(req.idTurma);
-                        break;
-                    }
-                }
+            std::map<std::pair<int, int>, int> aulasAlocadasPorTurmaDisciplina;
+            std::map<std::pair<int, int>, int> aulasRequeridasPorTurmaDisciplina;
 
-                int aulasAlocadas = 0;
-                for (const auto& aula : gradeResultante) {
-                    if (aula.idTurma == req.idTurma && aula.idDisciplina == req.idDisciplina) {
-                        aulasAlocadas++;
-                    }
+            // Primeiro, conta quantas aulas foram requeridas para cada combinação turma-disciplina
+            for (const auto& disc : disciplinas) {
+                for (const auto& [idTurma, qtdAulas] : disc.aulasPorTurma) {
+                    aulasRequeridasPorTurmaDisciplina[{idTurma, disc.id}] = qtdAulas;
                 }
+            }
+
+            // Depois, conta quantas aulas foram efetivamente alocadas
+            for (const auto& aula : gradeResultante) {
+                aulasAlocadasPorTurmaDisciplina[{aula.idTurma, aula.idDisciplina}]++;
+            }
+
+            // Agora compara
+            bool gradeValida = true;
+            for (const auto& [chave, aulasRequeridas] : aulasRequeridasPorTurmaDisciplina) {
+                int idTurma = chave.first;
+                int idDisciplina = chave.second;
+                int aulasAlocadas = aulasAlocadasPorTurmaDisciplina[chave];
 
                 if (aulasRequeridas != aulasAlocadas) {
                     gradeValida = false;
+
+                    // Busca os nomes para exibir mensagem mais clara
+                    std::string nomeTurma = "???";
+                    std::string nomeDisciplina = "???";
+
+                    for (const auto& t : turmas) {
+                        if (t.id == idTurma) {
+                            nomeTurma = t.nome;
+                            break;
+                        }
+                    }
+
+                    for (const auto& d : disciplinas) {
+                        if (d.id == idDisciplina) {
+                            nomeDisciplina = d.nome;
+                            break;
+                        }
+                    }
+
                     std::cout << "!!! FALHA NA VERIFICACAO: "
-                              << "Disciplina " << req.idDisciplina << " para Turma " << req.idTurma
-                              << " | Requerido: " << aulasRequeridas << " Alocado: " << aulasAlocadas << std::endl;
-                    break; // Para de verificar na primeira falha
+                              << "Disciplina '" << nomeDisciplina << "' para Turma '" << nomeTurma
+                              << "' | Requerido: " << aulasRequeridas << " Alocado: " << aulasAlocadas << std::endl;
                 }
             }
 
             if (gradeValida) {
                 sucesso = true;
-                break; // SUCESSO! Sai do laço de tentativas.
+                break;
             } else {
-                 std::cout << "--- ESTADO RESETADO, TENTANDO NOVAMENTE ---\n" << std::endl;
-                 gerador.reset(); // Se a verificação falhou, reseta e tenta de novo.
+                std::cout << "--- ESTADO RESETADO, TENTANDO NOVAMENTE ---\n" << std::endl;
+                gerador.reset(); // Se a verificação falhou, reseta e tenta de novo.
             }
 
         } else {
-             std::cout << "--- ESTADO RESETADO, TENTANDO NOVAMENTE ---\n" << std::endl;
-             gerador.reset(); // Se a construção falhou, reseta e tenta de novo.
+            std::cout << "--- ESTADO RESETADO, TENTANDO NOVAMENTE ---\n" << std::endl;
+            gerador.reset(); // Se a construção falhou, reseta e tenta de novo.
         }
     }
 
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
     if (sucesso) {
-        std::cout << "\n\nSOLUCAO ENCONTRADA E VERIFICADA!\n";
+        std::cout << "\n\n========================================" << std::endl;
+        std::cout << "    SOLUCAO ENCONTRADA E VERIFICADA!" << std::endl;
+        std::cout << "========================================" << std::endl;
+        std::cout << "Tentativas realizadas: " << tentativasRealizadas << std::endl;
+        std::cout << "Tempo total: " << duration.count() << " ms" << std::endl;
+        std::cout << "========================================\n" << std::endl;
+
         gerador.imprimirHorario();
+
+        // NOVO: Mostra estatísticas finais (se implementado)
+        // gerador.mostrarEstatisticasGrade();
+
     } else {
-        std::cout << "\n\nNAO FOI POSSIVEL ENCONTRAR UMA SOLUCAO COMPLETA APOS " << MAX_TENTATIVAS << " TENTATIVAS." << std::endl;
+        std::cout << "\n\n========================================" << std::endl;
+        std::cout << "           FALHA NA GERACAO" << std::endl;
+        std::cout << "========================================" << std::endl;
+        std::cout << "Nao foi possivel encontrar uma solucao completa apos "
+                  << MAX_TENTATIVAS << " tentativas." << std::endl;
+        std::cout << "Tempo total: " << duration.count() << " ms" << std::endl;
+        std::cout << "========================================" << std::endl;
     }
 
     return 0;
