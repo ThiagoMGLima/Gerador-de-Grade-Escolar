@@ -23,7 +23,7 @@ let gradeData = null;
         // Processar dados e criar mapa de cores
         function processData() {
             colorMap = {};
-            colorIndex = 1;
+            colorIndex = 0;
 
             // Atribuir cores às disciplinas
             gradeData.aulas.forEach(aula => {
