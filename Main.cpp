@@ -1,6 +1,8 @@
 #include "GeradorHorario.h"
+#include "SimulatedAnnealing.h"
 #include <map>
 #include <windows.h>
+#include <chrono>
 
 // Função para criar o cenário de exemplo com base nos seus dados
 void setupDadosExemplo(
@@ -8,7 +10,7 @@ void setupDadosExemplo(
     std::vector<Turma>& turmas, std::vector<Sala>& salas,
     std::vector<RequisicaoAlocacao>& reqs,
     std::set<std::tuple<int, int, int>>& disponibilidade,
-    std::map<int, int>& turmaSalaMap) {  // NOVO: mapa turma-sala
+    std::map<int, int>& turmaSalaMap) {
 
     // --- Mapeamento de Strings para IDs ---
     std::map<std::string, int> mapaIdDias = { {"Segunda", 0}, {"Terça", 1}, {"Quarta", 2}, {"Quinta", 3}, {"Sexta", 4} };
@@ -67,17 +69,17 @@ void setupDadosExemplo(
     std::vector<ProfData> professoresData = {
         {"Adilson", {"História"}, {{"Quarta", "7:30-8:15"}, {"Quarta", "8:15-9:00"}, {"Quarta", "9:00-9:45"}, {"Quarta", "10:05-10:50"},{"Quarta", "10:50-11:35"},{"Quarta", "11:35-12:20"}, {"Sexta", "7:30-8:15"}, {"Sexta", "8:15-9:00"}, {"Sexta", "9:00-9:45"}, {"Sexta", "10:05-10:50"},{"Sexta", "10:50-11:35"},{"Sexta", "11:35-12:20"}}},
         {"Alexandra", {"Artes"}, {{"Segunda", "7:30-8:15"}, {"Segunda", "8:15-9:00"}, {"Segunda", "9:00-9:45"}, {"Segunda", "10:05-10:50"}}},
-        {"Ana Rosa", {"Geografia"}, {{"Terça", "7:30-8:15"}, {"Terça", "8:15-9:00"}, {"Terça", "9:00-9:45"}, {"Terça", "10:05-10:50"},{"Terça", "10:50-11:35"},{"Terça", "11:35-12:20"}, {"Quarta", "7:30-8:15"}, {"Quarta", "8:15-9:00"}, {"Quarta", "9:00-9:45"}, {"Quarta", "10:05-10:50"},{"Quarta", "10:50-11:35"},{"Quarta", "11:35-12:20"}}},
+        {"Ana Rosa", {"Geografia"}, {{"Segunda", "7:30-8:15"}, {"Segunda", "8:15-9:00"}, {"Segunda", "9:00-9:45"}, {"Segunda", "10:05-10:50"},{"Segunda", "10:50-11:35"},{"Segunda", "11:35-12:20"}, {"Terça", "7:30-8:15"}, {"Terça", "8:15-9:00"}, {"Terça", "9:00-9:45"}, {"Terça", "10:05-10:50"},{"Terça", "10:50-11:35"},{"Terça", "11:35-12:20"}, {"Quarta", "7:30-8:15"}, {"Quarta", "8:15-9:00"}, {"Quarta", "9:00-9:45"}, {"Quarta", "10:05-10:50"},{"Quarta", "10:50-11:35"},{"Quarta", "11:35-12:20"}, {"Quinta", "7:30-8:15"}, {"Quinta", "8:15-9:00"}, {"Quinta", "9:00-9:45"}, {"Quinta", "10:05-10:50"},{"Quinta", "10:50-11:35"},{"Quinta", "11:35-12:20"} ,{"Sexta", "7:30-8:15"}, {"Sexta", "8:15-9:00"}, {"Sexta", "9:00-9:45"}, {"Sexta", "10:05-10:50"},{"Sexta", "10:50-11:35"},{"Sexta", "11:35-12:20"}}},
         {"Bianca", {"Espanhol"}, {{"Segunda", "10:50-11:35"},{"Segunda", "11:35-12:20"}, {"Quinta", "10:50-11:35"},{"Quinta", "11:35-12:20"}}},
         {"Denise", {"Inglês"},{{"Segunda", "9:00-9:45"}, {"Segunda", "10:05-10:50"},{"Segunda", "10:50-11:35"},{"Segunda", "11:35-12:20"}, {"Quarta", "9:00-9:45"}, {"Quarta", "10:05-10:50"},{"Quarta", "10:50-11:35"},{"Quarta", "11:35-12:20"}}},
         {"Camila R.", {"Educ. Socioemocional"}, { {"Terça", "9:00-9:45"}, {"Terça", "10:05-10:50"},{"Terça", "10:50-11:35"},{"Terça", "11:35-12:20"}}},
         {"Wanderlei", {"Matemática"}, {{"Segunda", "7:30-8:15"}, {"Segunda", "8:15-9:00"}, {"Segunda", "9:00-9:45"}, {"Segunda", "10:05-10:50"},{"Segunda", "10:50-11:35"},{"Segunda", "11:35-12:20"}, {"Terça", "7:30-8:15"}, {"Terça", "8:15-9:00"}, {"Terça", "9:00-9:45"}, {"Terça", "10:05-10:50"},{"Terça", "10:50-11:35"},{"Terça", "11:35-12:20"}, {"Quarta", "7:30-8:15"}, {"Quarta", "8:15-9:00"}, {"Quarta", "9:00-9:45"}, {"Quarta", "10:05-10:50"},{"Quarta", "10:50-11:35"},{"Quarta", "11:35-12:20"}, {"Quinta", "7:30-8:15"}, {"Quinta", "8:15-9:00"}, {"Quinta", "9:00-9:45"}, {"Quinta", "10:05-10:50"},{"Quinta", "10:50-11:35"},{"Quinta", "11:35-12:20"} ,{"Sexta", "7:30-8:15"}, {"Sexta", "8:15-9:00"}, {"Sexta", "9:00-9:45"}, {"Sexta", "10:05-10:50"},{"Sexta", "10:50-11:35"},{"Sexta", "11:35-12:20"}}},
         {"Elizangela", {"Prod. Texto"}, {{"Quinta", "7:30-8:15"}, {"Quinta", "8:15-9:00"}, {"Quinta", "9:00-9:45"}, {"Quinta", "10:05-10:50"},{"Quinta", "10:50-11:35"},{"Quinta", "11:35-12:20"} ,{"Sexta", "7:30-8:15"}, {"Sexta", "8:15-9:00"}, {"Sexta", "9:00-9:45"}, {"Sexta", "10:05-10:50"},{"Sexta", "10:50-11:35"},{"Sexta", "11:35-12:20"}}},
-        {"Jéssica", {"Ciências"}, {{"Segunda", "7:30-8:15"}, {"Segunda", "8:15-9:00"}, {"Segunda", "9:00-9:45"}, {"Segunda", "10:05-10:50"},{"Segunda", "10:50-11:35"},{"Segunda", "11:35-12:20"},{"Sexta", "7:30-8:15"}, {"Sexta", "8:15-9:00"}, {"Sexta", "9:00-9:45"}, {"Sexta", "10:05-10:50"},{"Sexta", "10:50-11:35"},{"Sexta", "11:35-12:20"}}},
+        {"Jéssica", {"Ciências"}, {{"Segunda", "7:30-8:15"}, {"Segunda", "8:15-9:00"}, {"Segunda", "9:00-9:45"}, {"Segunda", "10:05-10:50"},{"Segunda", "10:50-11:35"},{"Segunda", "11:35-12:20"}, {"Terça", "7:30-8:15"}, {"Terça", "8:15-9:00"}, {"Terça", "9:00-9:45"}, {"Terça", "10:05-10:50"},{"Terça", "10:50-11:35"},{"Terça", "11:35-12:20"}, {"Quarta", "7:30-8:15"}, {"Quarta", "8:15-9:00"}, {"Quarta", "9:00-9:45"}, {"Quarta", "10:05-10:50"},{"Quarta", "10:50-11:35"},{"Quarta", "11:35-12:20"}, {"Quinta", "7:30-8:15"}, {"Quinta", "8:15-9:00"}, {"Quinta", "9:00-9:45"}, {"Quinta", "10:05-10:50"},{"Quinta", "10:50-11:35"},{"Quinta", "11:35-12:20"} ,{"Sexta", "7:30-8:15"}, {"Sexta", "8:15-9:00"}, {"Sexta", "9:00-9:45"}, {"Sexta", "10:05-10:50"},{"Sexta", "10:50-11:35"},{"Sexta", "11:35-12:20"}}},
         {"Kátia", {"Musíca"}, {{"Terça", "11:35-12:20"}, {"Sexta", "10:05-10:50"}, {"Sexta", "10:50-11:35"}, {"Sexta", "11:35-12:20"}}},
         {"Neto", {"Educ. Física"}, {{"Terça", "10:50-11:35"}, {"Terça", "11:35-12:20"}, {"Quinta", "10:50-11:35"}, {"Quinta", "11:35-12:20"}}},
-        {"Ronaldo", {"Robótica"}, {{"Quinta", "7:30-8:15"}, {"Quinta", "8:15-9:00"}, {"Quinta", "9:00-9:45"}, {"Quinta", "10:05-10:50"}}},
-        {"Selma", {"Ling. Port."}, {{"Segunda", "7:30-8:15"}, {"Segunda", "8:15-9:00"}, {"Segunda", "9:00-9:45"}, {"Segunda", "10:05-10:50"},{"Segunda", "10:50-11:35"},{"Segunda", "11:35-12:20"}, {"Terça", "7:30-8:15"}, {"Terça", "8:15-9:00"}, {"Terça", "9:00-9:45"}, {"Terça", "10:05-10:50"},{"Terça", "10:50-11:35"},{"Terça", "11:35-12:20"}, {"Quarta", "7:30-8:15"}, {"Quarta", "8:15-9:00"}, {"Quarta", "9:00-9:45"}, {"Quarta", "10:05-10:50"},{"Quarta", "10:50-11:35"},{"Quarta", "11:35-12:20"}, {"Quinta", "7:30-8:15"}, {"Quinta", "8:15-9:00"}, {"Quinta", "9:00-9:45"}, {"Quinta", "10:05-10:50"},{"Quinta", "10:50-11:35"},{"Quinta", "11:35-12:20"} }}
+        {"Ronaldo", {"Robótica"}, {{"Segunda", "7:30-8:15"}, {"Segunda", "8:15-9:00"}, {"Segunda", "9:00-9:45"}, {"Segunda", "10:05-10:50"},{"Segunda", "10:50-11:35"},{"Segunda", "11:35-12:20"}, {"Terça", "7:30-8:15"}, {"Terça", "8:15-9:00"}, {"Terça", "9:00-9:45"}, {"Terça", "10:05-10:50"},{"Terça", "10:50-11:35"},{"Terça", "11:35-12:20"}, {"Quarta", "7:30-8:15"}, {"Quarta", "8:15-9:00"}, {"Quarta", "9:00-9:45"}, {"Quarta", "10:05-10:50"},{"Quarta", "10:50-11:35"},{"Quarta", "11:35-12:20"}, {"Quinta", "7:30-8:15"}, {"Quinta", "8:15-9:00"}, {"Quinta", "9:00-9:45"}, {"Quinta", "10:05-10:50"},{"Quinta", "10:50-11:35"},{"Quinta", "11:35-12:20"} ,{"Sexta", "7:30-8:15"}, {"Sexta", "8:15-9:00"}, {"Sexta", "9:00-9:45"}, {"Sexta", "10:05-10:50"},{"Sexta", "10:50-11:35"},{"Sexta", "11:35-12:20"}}},
+        {"Selma", {"Ling. Port."}, {{"Segunda", "7:30-8:15"}, {"Segunda", "8:15-9:00"}, {"Segunda", "9:00-9:45"}, {"Segunda", "10:05-10:50"},{"Segunda", "10:50-11:35"},{"Segunda", "11:35-12:20"}, {"Terça", "7:30-8:15"}, {"Terça", "8:15-9:00"}, {"Terça", "9:00-9:45"}, {"Terça", "10:05-10:50"},{"Terça", "10:50-11:35"},{"Terça", "11:35-12:20"}, {"Quarta", "7:30-8:15"}, {"Quarta", "8:15-9:00"}, {"Quarta", "9:00-9:45"}, {"Quarta", "10:05-10:50"},{"Quarta", "10:50-11:35"},{"Quarta", "11:35-12:20"}, {"Quinta", "7:30-8:15"}, {"Quinta", "8:15-9:00"}, {"Quinta", "9:00-9:45"}, {"Quinta", "10:05-10:50"},{"Quinta", "10:50-11:35"},{"Quinta", "11:35-12:20"} ,{"Sexta", "7:30-8:15"}, {"Sexta", "8:15-9:00"}, {"Sexta", "9:00-9:45"}, {"Sexta", "10:05-10:50"},{"Sexta", "10:50-11:35"},{"Sexta", "11:35-12:20"}}}
     };
 
     idCounter = 201;
@@ -109,7 +111,6 @@ void setupDadosExemplo(
         // Encontrar o professor para esta disciplina
         int idProfessor = -1;
         for (const auto& profData : professoresData) {
-            // Cada professor tem apenas uma disciplina em sua lista
             if (!profData.disciplinas.empty() && profData.disciplinas[0] == nomeDisciplina) {
                 idProfessor = mapaIdProfessores[profData.nome];
                 break;
@@ -128,7 +129,6 @@ void setupDadosExemplo(
 
             // Cria uma requisição para CADA AULA necessária
             for (int i = 0; i < aulasNecessarias; ++i) {
-                // Como não há preferências, todos têm o mesmo custo (0.0)
                 reqs.push_back({ idTurma, idDisciplina, idProfessor, 0.0, false });
             }
         }
@@ -147,7 +147,6 @@ void setupDadosExemplo(
 int main() {
     // Mudar a página de código do console para UTF-8
     SetConsoleOutputCP(CP_UTF8);
-    // Para garantir que o buffer de saída também funcione corretamente com UTF-8
     setvbuf(stdout, nullptr, _IOFBF, 1000);
 
     std::vector<Professor> professores;
@@ -156,7 +155,7 @@ int main() {
     std::vector<Sala> salas;
     std::vector<RequisicaoAlocacao> requisicoes;
     std::set<std::tuple<int, int, int>> disponibilidade;
-    std::map<int, int> turmaSalaMap;  // NOVO: mapa turma-sala
+    std::map<int, int> turmaSalaMap;
 
     setupDadosExemplo(professores, disciplinas, turmas, salas, requisicoes, disponibilidade, turmaSalaMap);
 
@@ -169,7 +168,7 @@ int main() {
         disponibilidadeTotalProf[std::get<0>(disp)]++;
     }
 
-    // Passa o mapa turma-sala para o gerador
+    // FASE 1: Construção Inicial
     GeradorHorario gerador(professores, disciplinas, turmas, salas, requisicoes,
                           disponibilidade, disponibilidadeTotalProf, turmaSalaMap);
 
@@ -183,9 +182,7 @@ int main() {
         tentativasRealizadas = tentativa;
         std::cout << "\n================== TENTATIVA NUMERO " << tentativa << " ==================" << std::endl;
 
-        // Se a construção terminou sem falha crítica, vamos verificar o resultado
         if (gerador.gerarHorario()) {
-
             std::cout << "\nVerificando a integridade da grade gerada..." << std::endl;
             std::vector<Aula> gradeResultante = gerador.getGradeHoraria();
 
@@ -193,19 +190,16 @@ int main() {
             std::map<std::pair<int, int>, int> aulasAlocadasPorTurmaDisciplina;
             std::map<std::pair<int, int>, int> aulasRequeridasPorTurmaDisciplina;
 
-            // Primeiro, conta quantas aulas foram requeridas para cada combinação turma-disciplina
             for (const auto& disc : disciplinas) {
                 for (const auto& [idTurma, qtdAulas] : disc.aulasPorTurma) {
                     aulasRequeridasPorTurmaDisciplina[{idTurma, disc.id}] = qtdAulas;
                 }
             }
 
-            // Depois, conta quantas aulas foram efetivamente alocadas
             for (const auto& aula : gradeResultante) {
                 aulasAlocadasPorTurmaDisciplina[{aula.idTurma, aula.idDisciplina}]++;
             }
 
-            // Agora compara
             bool gradeValida = true;
             for (const auto& [chave, aulasRequeridas] : aulasRequeridasPorTurmaDisciplina) {
                 int idTurma = chave.first;
@@ -214,8 +208,6 @@ int main() {
 
                 if (aulasRequeridas != aulasAlocadas) {
                     gradeValida = false;
-
-                    // Busca os nomes para exibir mensagem mais clara
                     std::string nomeTurma = "???";
                     std::string nomeDisciplina = "???";
 
@@ -244,12 +236,12 @@ int main() {
                 break;
             } else {
                 std::cout << "--- ESTADO RESETADO, TENTANDO NOVAMENTE ---\n" << std::endl;
-                gerador.reset(); // Se a verificação falhou, reseta e tenta de novo.
+                gerador.reset();
             }
 
         } else {
             std::cout << "--- ESTADO RESETADO, TENTANDO NOVAMENTE ---\n" << std::endl;
-            gerador.reset(); // Se a construção falhou, reseta e tenta de novo.
+            gerador.reset();
         }
     }
 
@@ -258,16 +250,49 @@ int main() {
 
     if (sucesso) {
         std::cout << "\n\n========================================" << std::endl;
-        std::cout << "    SOLUCAO ENCONTRADA E VERIFICADA!" << std::endl;
+        std::cout << "    FASE 1 CONCLUIDA COM SUCESSO!" << std::endl;
         std::cout << "========================================" << std::endl;
         std::cout << "Tentativas realizadas: " << tentativasRealizadas << std::endl;
         std::cout << "Tempo total: " << duration.count() << " ms" << std::endl;
         std::cout << "========================================\n" << std::endl;
 
         gerador.imprimirHorario();
+        gerador.exportarJSON("grade_horaria.json");
 
-        // NOVO: Mostra estatísticas finais (se implementado)
-        // gerador.mostrarEstatisticasGrade();
+        // FASE 2: Simulated Annealing
+        char executarFase2;
+        std::cout << "\n\nDeseja executar a Fase 2 (melhoramento com Simulated Annealing)? (S/N): ";
+        std::cin >> executarFase2;
+
+        if (executarFase2 == 'S' || executarFase2 == 's') {
+            std::cout << "\n\n========================================" << std::endl;
+            std::cout << "      INICIANDO FASE 2: MELHORAMENTO" << std::endl;
+            std::cout << "========================================" << std::endl;
+
+            // Configura e executa o Simulated Annealing
+            SimulatedAnnealing sa(
+                gerador.getGradeHoraria(),
+                professores,
+                disciplinas,
+                turmas,
+                salas,
+                disponibilidade,
+                turmaSalaMap,
+                10000,    // Número de iterações
+                100.0,    // Temperatura inicial
+                0.95      // Taxa de resfriamento
+            );
+
+            sa.executar();
+            sa.mostrarEstatisticas();
+
+            // Atualiza o gerador com a solução melhorada
+            gerador.setGradeHoraria(sa.getSolucaoFinal());
+
+            std::cout << "\n=== GRADE HORARIA FINAL (APOS MELHORAMENTO) ===" << std::endl;
+            gerador.imprimirHorario();
+            gerador.exportarJSON("grade_melhorada.json");
+        }
 
     } else {
         std::cout << "\n\n========================================" << std::endl;

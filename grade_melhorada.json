@@ -1,0 +1,992 @@
+{
+  "metadata": {
+    "turmas": ["6º Ano", "7º Ano", "8º Ano", "9º Ano"],
+    "dias": ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"],
+    "horarios": ["7:30-8:15", "8:15-9:00", "9:00-9:45", "10:05-10:50", "10:50-11:35", "11:35-12:20"]
+  },
+  "aulas": [
+    {
+      "turma": "7º Ano",
+      "disciplina": "Inglês",
+      "professor": "Denise",
+      "sala": "Sala 7º Ano",
+      "dia": 2,
+      "hora": 3
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "História",
+      "professor": "Adilson",
+      "sala": "Sala 7º Ano",
+      "dia": 2,
+      "hora": 4
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "História",
+      "professor": "Adilson",
+      "sala": "Sala 9º Ano",
+      "dia": 4,
+      "hora": 3
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Inglês",
+      "professor": "Denise",
+      "sala": "Sala 6º Ano",
+      "dia": 0,
+      "hora": 5
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "História",
+      "professor": "Adilson",
+      "sala": "Sala 6º Ano",
+      "dia": 4,
+      "hora": 2
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "História",
+      "professor": "Adilson",
+      "sala": "Sala 7º Ano",
+      "dia": 4,
+      "hora": 1
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "História",
+      "professor": "Adilson",
+      "sala": "Sala 6º Ano",
+      "dia": 4,
+      "hora": 4
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Educ. Física",
+      "professor": "Neto",
+      "sala": "Sala 9º Ano",
+      "dia": 3,
+      "hora": 4
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Artes",
+      "professor": "Alexandra",
+      "sala": "Sala 8º Ano",
+      "dia": 0,
+      "hora": 2
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "História",
+      "professor": "Adilson",
+      "sala": "Sala 8º Ano",
+      "dia": 2,
+      "hora": 5
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Inglês",
+      "professor": "Denise",
+      "sala": "Sala 9º Ano",
+      "dia": 2,
+      "hora": 2
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "História",
+      "professor": "Adilson",
+      "sala": "Sala 9º Ano",
+      "dia": 2,
+      "hora": 0
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Espanhol",
+      "professor": "Bianca",
+      "sala": "Sala 6º Ano",
+      "dia": 3,
+      "hora": 5
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Espanhol",
+      "professor": "Bianca",
+      "sala": "Sala 9º Ano",
+      "dia": 0,
+      "hora": 5
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Inglês",
+      "professor": "Denise",
+      "sala": "Sala 7º Ano",
+      "dia": 0,
+      "hora": 4
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Artes",
+      "professor": "Alexandra",
+      "sala": "Sala 6º Ano",
+      "dia": 0,
+      "hora": 3
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "História",
+      "professor": "Adilson",
+      "sala": "Sala 8º Ano",
+      "dia": 2,
+      "hora": 3
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "História",
+      "professor": "Adilson",
+      "sala": "Sala 6º Ano",
+      "dia": 2,
+      "hora": 1
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Educ. Socioemocional",
+      "professor": "Camila R.",
+      "sala": "Sala 7º Ano",
+      "dia": 1,
+      "hora": 5
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Educ. Física",
+      "professor": "Neto",
+      "sala": "Sala 8º Ano",
+      "dia": 1,
+      "hora": 5
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Artes",
+      "professor": "Alexandra",
+      "sala": "Sala 7º Ano",
+      "dia": 0,
+      "hora": 0
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Artes",
+      "professor": "Alexandra",
+      "sala": "Sala 9º Ano",
+      "dia": 0,
+      "hora": 1
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Inglês",
+      "professor": "Denise",
+      "sala": "Sala 9º Ano",
+      "dia": 0,
+      "hora": 2
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Espanhol",
+      "professor": "Bianca",
+      "sala": "Sala 7º Ano",
+      "dia": 3,
+      "hora": 4
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Educ. Física",
+      "professor": "Neto",
+      "sala": "Sala 6º Ano",
+      "dia": 1,
+      "hora": 4
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Musíca",
+      "professor": "Kátia",
+      "sala": "Sala 8º Ano",
+      "dia": 4,
+      "hora": 3
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Educ. Socioemocional",
+      "professor": "Camila R.",
+      "sala": "Sala 9º Ano",
+      "dia": 1,
+      "hora": 3
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Espanhol",
+      "professor": "Bianca",
+      "sala": "Sala 8º Ano",
+      "dia": 0,
+      "hora": 4
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Inglês",
+      "professor": "Denise",
+      "sala": "Sala 8º Ano",
+      "dia": 0,
+      "hora": 3
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Educ. Física",
+      "professor": "Neto",
+      "sala": "Sala 7º Ano",
+      "dia": 3,
+      "hora": 5
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Musíca",
+      "professor": "Kátia",
+      "sala": "Sala 7º Ano",
+      "dia": 4,
+      "hora": 4
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Inglês",
+      "professor": "Denise",
+      "sala": "Sala 6º Ano",
+      "dia": 2,
+      "hora": 5
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Educ. Socioemocional",
+      "professor": "Camila R.",
+      "sala": "Sala 6º Ano",
+      "dia": 1,
+      "hora": 2
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Inglês",
+      "professor": "Denise",
+      "sala": "Sala 8º Ano",
+      "dia": 2,
+      "hora": 4
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "História",
+      "professor": "Adilson",
+      "sala": "Sala 7º Ano",
+      "dia": 4,
+      "hora": 0
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "História",
+      "professor": "Adilson",
+      "sala": "Sala 9º Ano",
+      "dia": 4,
+      "hora": 5
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "História",
+      "professor": "Adilson",
+      "sala": "Sala 8º Ano",
+      "dia": 2,
+      "hora": 2
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Educ. Socioemocional",
+      "professor": "Camila R.",
+      "sala": "Sala 8º Ano",
+      "dia": 1,
+      "hora": 4
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Musíca",
+      "professor": "Kátia",
+      "sala": "Sala 6º Ano",
+      "dia": 4,
+      "hora": 5
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Musíca",
+      "professor": "Kátia",
+      "sala": "Sala 9º Ano",
+      "dia": 1,
+      "hora": 5
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 8º Ano",
+      "dia": 2,
+      "hora": 0
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 8º Ano",
+      "dia": 4,
+      "hora": 2
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 6º Ano",
+      "dia": 2,
+      "hora": 2
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 7º Ano",
+      "dia": 2,
+      "hora": 5
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 6º Ano",
+      "dia": 0,
+      "hora": 4
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 8º Ano",
+      "dia": 0,
+      "hora": 5
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 6º Ano",
+      "dia": 0,
+      "hora": 2
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 9º Ano",
+      "dia": 0,
+      "hora": 3
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 8º Ano",
+      "dia": 4,
+      "hora": 0
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 7º Ano",
+      "dia": 3,
+      "hora": 3
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 6º Ano",
+      "dia": 3,
+      "hora": 4
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 8º Ano",
+      "dia": 1,
+      "hora": 3
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 7º Ano",
+      "dia": 1,
+      "hora": 2
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 9º Ano",
+      "dia": 1,
+      "hora": 4
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 7º Ano",
+      "dia": 3,
+      "hora": 0
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 6º Ano",
+      "dia": 4,
+      "hora": 1
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 9º Ano",
+      "dia": 1,
+      "hora": 0
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 7º Ano",
+      "dia": 2,
+      "hora": 1
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 7º Ano",
+      "dia": 3,
+      "hora": 2
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 8º Ano",
+      "dia": 3,
+      "hora": 5
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 9º Ano",
+      "dia": 1,
+      "hora": 1
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 9º Ano",
+      "dia": 2,
+      "hora": 4
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 6º Ano",
+      "dia": 3,
+      "hora": 1
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Matemática",
+      "professor": "Wanderlei",
+      "sala": "Sala 9º Ano",
+      "dia": 4,
+      "hora": 4
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Prod. Texto",
+      "professor": "Elizangela",
+      "sala": "Sala 7º Ano",
+      "dia": 3,
+      "hora": 1
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Prod. Texto",
+      "professor": "Elizangela",
+      "sala": "Sala 8º Ano",
+      "dia": 4,
+      "hora": 4
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Ling. Port.",
+      "professor": "Selma",
+      "sala": "Sala 7º Ano",
+      "dia": 1,
+      "hora": 4
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Prod. Texto",
+      "professor": "Elizangela",
+      "sala": "Sala 6º Ano",
+      "dia": 4,
+      "hora": 3
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Ling. Port.",
+      "professor": "Selma",
+      "sala": "Sala 6º Ano",
+      "dia": 1,
+      "hora": 5
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Ling. Port.",
+      "professor": "Selma",
+      "sala": "Sala 7º Ano",
+      "dia": 1,
+      "hora": 3
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Ling. Port.",
+      "professor": "Selma",
+      "sala": "Sala 6º Ano",
+      "dia": 2,
+      "hora": 3
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Ling. Port.",
+      "professor": "Selma",
+      "sala": "Sala 9º Ano",
+      "dia": 0,
+      "hora": 4
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Ling. Port.",
+      "professor": "Selma",
+      "sala": "Sala 8º Ano",
+      "dia": 1,
+      "hora": 0
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Prod. Texto",
+      "professor": "Elizangela",
+      "sala": "Sala 9º Ano",
+      "dia": 4,
+      "hora": 0
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Ling. Port.",
+      "professor": "Selma",
+      "sala": "Sala 6º Ano",
+      "dia": 0,
+      "hora": 1
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Ling. Port.",
+      "professor": "Selma",
+      "sala": "Sala 8º Ano",
+      "dia": 1,
+      "hora": 1
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Ling. Port.",
+      "professor": "Selma",
+      "sala": "Sala 7º Ano",
+      "dia": 2,
+      "hora": 0
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Ling. Port.",
+      "professor": "Selma",
+      "sala": "Sala 9º Ano",
+      "dia": 2,
+      "hora": 1
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Ling. Port.",
+      "professor": "Selma",
+      "sala": "Sala 6º Ano",
+      "dia": 2,
+      "hora": 4
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Prod. Texto",
+      "professor": "Elizangela",
+      "sala": "Sala 6º Ano",
+      "dia": 3,
+      "hora": 2
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Ling. Port.",
+      "professor": "Selma",
+      "sala": "Sala 8º Ano",
+      "dia": 4,
+      "hora": 1
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Ling. Port.",
+      "professor": "Selma",
+      "sala": "Sala 6º Ano",
+      "dia": 4,
+      "hora": 0
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Ling. Port.",
+      "professor": "Selma",
+      "sala": "Sala 8º Ano",
+      "dia": 0,
+      "hora": 0
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Ling. Port.",
+      "professor": "Selma",
+      "sala": "Sala 9º Ano",
+      "dia": 4,
+      "hora": 2
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Ling. Port.",
+      "professor": "Selma",
+      "sala": "Sala 7º Ano",
+      "dia": 0,
+      "hora": 5
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Ling. Port.",
+      "professor": "Selma",
+      "sala": "Sala 9º Ano",
+      "dia": 3,
+      "hora": 3
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Prod. Texto",
+      "professor": "Elizangela",
+      "sala": "Sala 9º Ano",
+      "dia": 4,
+      "hora": 1
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Ling. Port.",
+      "professor": "Selma",
+      "sala": "Sala 7º Ano",
+      "dia": 2,
+      "hora": 2
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Prod. Texto",
+      "professor": "Elizangela",
+      "sala": "Sala 8º Ano",
+      "dia": 3,
+      "hora": 3
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Ling. Port.",
+      "professor": "Selma",
+      "sala": "Sala 8º Ano",
+      "dia": 3,
+      "hora": 0
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Prod. Texto",
+      "professor": "Elizangela",
+      "sala": "Sala 7º Ano",
+      "dia": 4,
+      "hora": 2
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Ling. Port.",
+      "professor": "Selma",
+      "sala": "Sala 9º Ano",
+      "dia": 3,
+      "hora": 2
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Ciências",
+      "professor": "Jéssica",
+      "sala": "Sala 7º Ano",
+      "dia": 0,
+      "hora": 3
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Geografia",
+      "professor": "Ana Rosa",
+      "sala": "Sala 8º Ano",
+      "dia": 2,
+      "hora": 1
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Ciências",
+      "professor": "Jéssica",
+      "sala": "Sala 8º Ano",
+      "dia": 0,
+      "hora": 1
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Ciências",
+      "professor": "Jéssica",
+      "sala": "Sala 6º Ano",
+      "dia": 1,
+      "hora": 0
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Geografia",
+      "professor": "Ana Rosa",
+      "sala": "Sala 8º Ano",
+      "dia": 4,
+      "hora": 5
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Ciências",
+      "professor": "Jéssica",
+      "sala": "Sala 7º Ano",
+      "dia": 0,
+      "hora": 2
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Ciências",
+      "professor": "Jéssica",
+      "sala": "Sala 8º Ano",
+      "dia": 1,
+      "hora": 2
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Ciências",
+      "professor": "Jéssica",
+      "sala": "Sala 7º Ano",
+      "dia": 4,
+      "hora": 5
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Geografia",
+      "professor": "Ana Rosa",
+      "sala": "Sala 9º Ano",
+      "dia": 1,
+      "hora": 2
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Ciências",
+      "professor": "Jéssica",
+      "sala": "Sala 9º Ano",
+      "dia": 3,
+      "hora": 5
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Ciências",
+      "professor": "Jéssica",
+      "sala": "Sala 6º Ano",
+      "dia": 1,
+      "hora": 3
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Geografia",
+      "professor": "Ana Rosa",
+      "sala": "Sala 9º Ano",
+      "dia": 3,
+      "hora": 0
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Ciências",
+      "professor": "Jéssica",
+      "sala": "Sala 6º Ano",
+      "dia": 3,
+      "hora": 3
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Geografia",
+      "professor": "Ana Rosa",
+      "sala": "Sala 6º Ano",
+      "dia": 1,
+      "hora": 1
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Geografia",
+      "professor": "Ana Rosa",
+      "sala": "Sala 9º Ano",
+      "dia": 2,
+      "hora": 3
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Geografia",
+      "professor": "Ana Rosa",
+      "sala": "Sala 8º Ano",
+      "dia": 3,
+      "hora": 2
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Ciências",
+      "professor": "Jéssica",
+      "sala": "Sala 9º Ano",
+      "dia": 2,
+      "hora": 5
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Geografia",
+      "professor": "Ana Rosa",
+      "sala": "Sala 7º Ano",
+      "dia": 4,
+      "hora": 3
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Geografia",
+      "professor": "Ana Rosa",
+      "sala": "Sala 6º Ano",
+      "dia": 2,
+      "hora": 0
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Ciências",
+      "professor": "Jéssica",
+      "sala": "Sala 9º Ano",
+      "dia": 3,
+      "hora": 1
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Geografia",
+      "professor": "Ana Rosa",
+      "sala": "Sala 6º Ano",
+      "dia": 0,
+      "hora": 0
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Ciências",
+      "professor": "Jéssica",
+      "sala": "Sala 8º Ano",
+      "dia": 3,
+      "hora": 4
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Geografia",
+      "professor": "Ana Rosa",
+      "sala": "Sala 7º Ano",
+      "dia": 0,
+      "hora": 1
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Geografia",
+      "professor": "Ana Rosa",
+      "sala": "Sala 7º Ano",
+      "dia": 1,
+      "hora": 0
+    },
+    {
+      "turma": "6º Ano",
+      "disciplina": "Robótica",
+      "professor": "Ronaldo",
+      "sala": "Sala 6º Ano",
+      "dia": 3,
+      "hora": 0
+    },
+    {
+      "turma": "9º Ano",
+      "disciplina": "Robótica",
+      "professor": "Ronaldo",
+      "sala": "Sala 9º Ano",
+      "dia": 0,
+      "hora": 0
+    },
+    {
+      "turma": "8º Ano",
+      "disciplina": "Robótica",
+      "professor": "Ronaldo",
+      "sala": "Sala 8º Ano",
+      "dia": 3,
+      "hora": 1
+    },
+    {
+      "turma": "7º Ano",
+      "disciplina": "Robótica",
+      "professor": "Ronaldo",
+      "sala": "Sala 7º Ano",
+      "dia": 1,
+      "hora": 1
+    }
+  ],
+  "estatisticas": {
+    "aulasPorTurma": {
+      "6º Ano": 30,
+      "7º Ano": 30,
+      "8º Ano": 30,
+      "9º Ano": 30
+    },
+    "aulasPorProfessor": {
+      "Adilson": 12,
+      "Alexandra": 4,
+      "Ana Rosa": 12,
+      "Bianca": 4,
+      "Denise": 8,
+      "Camila R.": 4,
+      "Wanderlei": 24,
+      "Elizangela": 8,
+      "Jéssica": 12,
+      "Kátia": 4,
+      "Neto": 4,
+      "Ronaldo": 4,
+      "Selma": 20
+    }
+  }
+}

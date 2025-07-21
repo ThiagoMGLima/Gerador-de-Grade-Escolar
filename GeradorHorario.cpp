@@ -4,6 +4,9 @@
 #include <limits>
 #include <iomanip>
 #include <iostream>
+#include <fstream>
+#include <sstream>
+
 
 GeradorHorario::GeradorHorario(
     std::vector<Professor> profs, std::vector<Disciplina> disc,
@@ -52,7 +55,7 @@ void GeradorHorario::analisarCargaDeTrabalho(const std::vector<RequisicaoAlocaca
     std::sort(criticidadePorProfessor.begin(), criticidadePorProfessor.end(),
               [](const auto& a, const auto& b) { return a.second > b.second; });
 
-    for (const auto& [idProf, criticidade] : criticidadePorProfessor) {
+    /*for (const auto& [idProf, criticidade] : criticidadePorProfessor) {
         int qtdAulas = aulasPoeProfessor[idProf];
         int disponibilidade = disponibilidadeTotalProfessores.at(idProf);
 
@@ -70,7 +73,89 @@ void GeradorHorario::analisarCargaDeTrabalho(const std::vector<RequisicaoAlocaca
 
         std::cout << std::fixed << std::setprecision(1)
                   << (criticidade * 100) << "%]" << std::endl;
+    }*/
+}
+
+void GeradorHorario::exportarJSON(const std::string& nomeArquivo) const {
+    std::ofstream arquivo(nomeArquivo);
+
+    if (!arquivo.is_open()) {
+        std::cerr << "Erro ao criar arquivo JSON: " << nomeArquivo << std::endl;
+        return;
     }
+
+    arquivo << "{\n";
+
+    // Metadata
+    arquivo << "  \"metadata\": {\n";
+    arquivo << "    \"turmas\": [";
+    for (size_t i = 0; i < turmas.size(); i++) {
+        arquivo << "\"" << turmas[i].nome << "\"";
+        if (i < turmas.size() - 1) arquivo << ", ";
+    }
+    arquivo << "],\n";
+
+    arquivo << "    \"dias\": [\"Segunda\", \"Terça\", \"Quarta\", \"Quinta\", \"Sexta\"],\n";
+    arquivo << "    \"horarios\": [\"7:30-8:15\", \"8:15-9:00\", \"9:00-9:45\", \"10:05-10:50\", \"10:50-11:35\", \"11:35-12:20\"]\n";
+    arquivo << "  },\n";
+
+    // Aulas
+    arquivo << "  \"aulas\": [\n";
+    for (size_t i = 0; i < gradeHoraria.size(); i++) {
+        const auto& aula = gradeHoraria[i];
+        arquivo << "    {\n";
+        arquivo << "      \"turma\": \"" << mapaNomesTurmas.at(aula.idTurma) << "\",\n";
+        arquivo << "      \"disciplina\": \"" << mapaNomesDisciplinas.at(aula.idDisciplina) << "\",\n";
+        arquivo << "      \"professor\": \"" << mapaNomesProfessores.at(aula.idProfessor) << "\",\n";
+        arquivo << "      \"sala\": \"" << mapaNomesSalas.at(aula.idSala) << "\",\n";
+        arquivo << "      \"dia\": " << aula.slot.dia << ",\n";
+        arquivo << "      \"hora\": " << aula.slot.hora << "\n";
+        arquivo << "    }";
+        if (i < gradeHoraria.size() - 1) arquivo << ",";
+        arquivo << "\n";
+    }
+    arquivo << "  ],\n";
+
+    // Estatísticas
+    arquivo << "  \"estatisticas\": {\n";
+
+    // Aulas por turma
+    std::map<int, int> aulasPorTurma;
+    std::map<int, std::map<int, int>> aulasPorDiaTurma;
+    for (const auto& aula : gradeHoraria) {
+        aulasPorTurma[aula.idTurma]++;
+        aulasPorDiaTurma[aula.idTurma][aula.slot.dia]++;
+    }
+
+    arquivo << "    \"aulasPorTurma\": {\n";
+    bool primeiro = true;
+    for (const auto& [idTurma, qtd] : aulasPorTurma) {
+        if (!primeiro) arquivo << ",\n";
+        arquivo << "      \"" << mapaNomesTurmas.at(idTurma) << "\": " << qtd;
+        primeiro = false;
+    }
+    arquivo << "\n    },\n";
+
+    // Aulas por professor
+    std::map<int, int> aulasPorProfessor;
+    for (const auto& aula : gradeHoraria) {
+        aulasPorProfessor[aula.idProfessor]++;
+    }
+
+    arquivo << "    \"aulasPorProfessor\": {\n";
+    primeiro = true;
+    for (const auto& [idProf, qtd] : aulasPorProfessor) {
+        if (!primeiro) arquivo << ",\n";
+        arquivo << "      \"" << mapaNomesProfessores.at(idProf) << "\": " << qtd;
+        primeiro = false;
+    }
+    arquivo << "\n    }\n";
+
+    arquivo << "  }\n";
+    arquivo << "}\n";
+
+    arquivo.close();
+    std::cout << "\nGrade exportada para: " << nomeArquivo << std::endl;
 }
 
 bool GeradorHorario::gerarHorario() {
@@ -128,7 +213,7 @@ bool GeradorHorario::gerarHorario() {
     }
 
     std::cout << "\n=== INICIANDO ALOCACAO ===" << std::endl;
-    std::cout << "Total de aulas a alocar: " << requisicoesParaTentar.size() << std::endl;
+    //std::cout << "Total de aulas a alocar: " << requisicoesParaTentar.size() << std::endl;
 
     // Tenta alocar todas as requisições
     int alocadas = 0;

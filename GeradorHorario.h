@@ -17,14 +17,16 @@ public:
         std::vector<RequisicaoAlocacao> reqs,
         std::set<std::tuple<int, int, int>> disponibilidade,
         std::map<int, int> disponibilidadeTotalProf,
-        std::map<int, int> turmaSalaMapping
+        std::map<int, int> turmaSalaMapping  // NOVO: mapa turma-sala
     );
 
+    void exportarJSON(const std::string& nomeArquivo) const;
     bool gerarHorario();
     void reset();
     void imprimirHorario();
     std::vector<Aula> getGradeHoraria();
-    void mostrarEstatisticasGrade();
+    void setGradeHoraria(const std::vector<Aula>& novaGrade) { gradeHoraria = novaGrade; }
+    void mostrarEstatisticasGrade();  // NOVO: método para estatísticas
 
 private:
     // Dados de entrada e de estado
@@ -51,6 +53,7 @@ private:
     bool tentarAlocarRequisicao(const RequisicaoAlocacao& req);
     bool verificarDisponibilidade(int idTurma, int idProfessor, int idSala, Slot slot);
 
+    // NOVO: funções auxiliares para análise
     void analisarCargaDeTrabalho(const std::vector<RequisicaoAlocacao>& requisicoes);
     float calcularCriticidade(int idProfessor, int aulasNecessarias);
 };
