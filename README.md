@@ -4,7 +4,7 @@ Este projeto é uma aplicação robusta para a geração e otimização de grade
 
 O projeto inclui também um visualizador web interativo para analisar e inspecionar as grades geradas.
 
-A metodologia implementada foi inspirada e baseada nos conceitos apresentados na dissertação de mestrado de Everton Luiz Tives, disponível em: [Geração de Grade de Horários para Instituições de Ensino Utilizando Algoritmos Genéticos e Têmpera Simulada](http://hdl.handle.net/10183/39522).
+A metodologia implementada foi inspirada e baseada nos conceitos apresentados na dissertação de mestrado de Camilo José Bornia Poulsen,  disponível em: [Desenvolvimento de um modelo para o School Timetabling Problem baseado na Meta-Heurística Simulated Annealing](http://hdl.handle.net/10183/39522).
 
 ## 🚀 Funcionalidades
 
