@@ -1,5 +1,3 @@
-Claro, aqui está uma proposta de `README.md` para o seu projeto, elaborada a partir da análise dos arquivos de código e da sua solicitação.
-
 -----
 
 # Gerador de Horários Escolares com Otimização
