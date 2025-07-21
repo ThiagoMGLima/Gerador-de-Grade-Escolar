@@ -1,5 +1,3 @@
------
-
 # Gerador de Horários Escolares com Otimização
 
 Este projeto é uma aplicação robusta para a geração e otimização de grades horárias escolares, um problema clássico de otimização combinatória. A solução foi desenvolvida em C++ e utiliza uma abordagem de duas fases: primeiro, a construção de uma grade viável através de uma heurística construtiva e, em seguida, o refinamento dessa grade usando a meta-heurística de *Simulated Annealing* (Têmpera Simulada).
