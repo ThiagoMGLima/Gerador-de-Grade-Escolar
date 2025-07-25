@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Cadastro - Grade Horária</title>
+    <link rel="stylesheet" href="style_cadastro.css">
+</head>
+<body>
+    <div class="header">
+        <h1>📋 Sistema de Cadastro - Grade Horária</h1>
+    </div>
+
+    <div class="container">
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('turmas')">Turmas</button>
+            <button class="nav-tab" onclick="showTab('disciplinas')">Disciplinas</button>
+            <button class="nav-tab" onclick="showTab('professores')">Professores</button>
+            <button class="nav-tab" onclick="showTab('salas')">Salas</button>
+            <button class="nav-tab" onclick="showTab('resumo')">Resumo</button>
+        </div>
+
+        <div class="tab-content" id="turmas-tab">
+            <div class="form-section">
+                <h3>Cadastrar Nova Turma</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="turmaNome">Nome da Turma</label>
+                        <input type="text" id="turmaNome" placeholder="Ex: 6º Ano">
+                    </div>
+                    <div class="form-group">
+                        <label for="turmaTurno">Turno</label>
+                        <select id="turmaTurno">
+                            <option value="manha">Manhã</option>
+                            <option value="tarde">Tarde</option>
+                            <option value="noite">Noite</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="adicionarTurma()">Adicionar Turma</button>
+            </div>
+
+            <div class="form-section">
+                <h3>Turmas Cadastradas</h3>
+                <table class="data-table" id="turmasTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Turno</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="disciplinas-tab" style="display: none;">
+            <div class="form-section">
+                <h3>Cadastrar Nova Disciplina</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="disciplinaNome">Nome da Disciplina</label>
+                        <input type="text" id="disciplinaNome" placeholder="Ex: Matemática">
+                    </div>
+                </div>
+
+                <h4 style="margin: 1.5rem 0 1rem;">Carga Horária por Turma</h4>
+                <div id="cargaHorariaContainer"></div>
+
+                <button class="btn btn-primary" onclick="adicionarDisciplina()">Adicionar Disciplina</button>
+            </div>
+
+            <div class="form-section">
+                <h3>Disciplinas Cadastradas</h3>
+                <table class="data-table" id="disciplinasTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Carga Horária</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="professores-tab" style="display: none;">
+            <div class="form-section">
+                <h3>Cadastrar Novo Professor</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="professorNome">Nome do Professor</label>
+                        <input type="text" id="professorNome" placeholder="Ex: João Silva">
+                    </div>
+                    <div class="form-group">
+                        <label for="professorDisciplina">Disciplina</label>
+                        <select id="professorDisciplina"></select>
+                    </div>
+                </div>
+
+                <h4 style="margin: 1.5rem 0 1rem;">Disponibilidade de Horários</h4>
+                <div class="availability-grid" id="availabilityGrid"></div>
+
+                <button class="btn btn-primary" onclick="adicionarProfessor()" style="margin-top: 1rem;">Adicionar Professor</button>
+            </div>
+
+            <div class="form-section">
+                <h3>Professores Cadastrados</h3>
+                <table class="data-table" id="professoresTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Disciplina</th>
+                            <th>Horários Disponíveis</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="salas-tab" style="display: none;">
+            <div class="form-section">
+                <h3>Cadastrar Nova Sala</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="salaNome">Nome da Sala</label>
+                        <input type="text" id="salaNome" placeholder="Ex: Sala 101">
+                    </div>
+                    <div class="form-group">
+                        <label for="salaTipo">Tipo de Sala</label>
+                        <select id="salaTipo">
+                            <option value="normal">Sala Normal</option>
+                            <option value="laboratorio">Laboratório</option>
+                            <option value="quadra">Quadra</option>
+                            <option value="biblioteca">Biblioteca</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="salaCompartilhada">
+                            <input type="checkbox" id="salaCompartilhada">
+                            Sala Compartilhada
+                        </label>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="adicionarSala()">Adicionar Sala</button>
+            </div>
+
+            <div class="form-section">
+                <h3>Salas Cadastradas</h3>
+                <table class="data-table" id="salasTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Tipo</th>
+                            <th>Compartilhada</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="resumo-tab" style="display: none;">
+            <h3>Resumo do Sistema</h3>
+
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <h4>Turmas</h4>
+                    <div class="value" id="totalTurmas">0</div>
+                </div>
+                <div class="summary-card">
+                    <h4>Disciplinas</h4>
+                    <div class="value" id="totalDisciplinas">0</div>
+                </div>
+                <div class="summary-card">
+                    <h4>Professores</h4>
+                    <div class="value" id="totalProfessores">0</div>
+                </div>
+                <div class="summary-card">
+                    <h4>Salas</h4>
+                    <div class="value" id="totalSalas">0</div>
+                </div>
+            </div>
+
+            <div class="export-section">
+                <h3>Exportar Dados</h3>
+                <p>Exporte todos os dados cadastrados para usar no gerador de grades</p>
+                <div style="margin-top: 1rem;">
+                    <button class="btn btn-success" onclick="exportarDados()">📥 Exportar Dados (JSON)</button>
+                    <button class="btn btn-primary" onclick="exportarCodigo()">📄 Gerar Código C++</button>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Validação de Dados</h3>
+                <div id="validationResults"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para edição -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3 id="modalTitle">Editar</h3>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script src="script_cadastro.js">   </script>
+</body>
+</html>

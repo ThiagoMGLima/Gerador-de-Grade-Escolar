@@ -1,7 +1,7 @@
 #include "GeradorHorario.h"
 #include "SimulatedAnnealing.h"
 #include <map>
-#include <windows.h>
+// #include <windows.h>
 #include <chrono>
 
 // Função para criar o cenário de exemplo com base nos seus dados
@@ -69,7 +69,7 @@ void setupDadosExemplo(
     std::vector<ProfData> professoresData = {
         {"Adilson", {"História"}, {{"Quarta", "7:30-8:15"}, {"Quarta", "8:15-9:00"}, {"Quarta", "9:00-9:45"}, {"Quarta", "10:05-10:50"},{"Quarta", "10:50-11:35"},{"Quarta", "11:35-12:20"}, {"Sexta", "7:30-8:15"}, {"Sexta", "8:15-9:00"}, {"Sexta", "9:00-9:45"}, {"Sexta", "10:05-10:50"},{"Sexta", "10:50-11:35"},{"Sexta", "11:35-12:20"}}},
         {"Alexandra", {"Artes"}, {{"Segunda", "7:30-8:15"}, {"Segunda", "8:15-9:00"}, {"Segunda", "9:00-9:45"}, {"Segunda", "10:05-10:50"}}},
-        {"Ana Rosa", {"Geografia"}, {{"Segunda", "7:30-8:15"}, {"Segunda", "8:15-9:00"}, {"Segunda", "9:00-9:45"}, {"Segunda", "10:05-10:50"},{"Segunda", "10:50-11:35"},{"Segunda", "11:35-12:20"}, {"Terça", "7:30-8:15"}, {"Terça", "8:15-9:00"}, {"Terça", "9:00-9:45"}, {"Terça", "10:05-10:50"},{"Terça", "10:50-11:35"},{"Terça", "11:35-12:20"}, {"Quarta", "7:30-8:15"}, {"Quarta", "8:15-9:00"}, {"Quarta", "9:00-9:45"}, {"Quarta", "10:05-10:50"},{"Quarta", "10:50-11:35"},{"Quarta", "11:35-12:20"}, {"Quinta", "7:30-8:15"}, {"Quinta", "8:15-9:00"}, {"Quinta", "9:00-9:45"}, {"Quinta", "10:05-10:50"},{"Quinta", "10:50-11:35"},{"Quinta", "11:35-12:20"} ,{"Sexta", "7:30-8:15"}, {"Sexta", "8:15-9:00"}, {"Sexta", "9:00-9:45"}, {"Sexta", "10:05-10:50"},{"Sexta", "10:50-11:35"},{"Sexta", "11:35-12:20"}}},
+        {"Ana Rosa", {"Geografia"}, {{"Segunda", "7:30-8:15"}, {"Segunda", "8:15-9:00"}, {"Segunda", "9:00-9:45"}, {"Segunda", "10:05-10:50"},{"Segunda", "10:50-11:35"},{"Segunda", "11:35-12:20"}, {"Terça", "7:30-8:15"}, {"Terça", "8:15-9:00"}, {"Terça", "9:00-9:45"}, {"Terça", "10:05-10:50"},{"Terça", "10:50-11:35"},{"Terça", "11:35-12:20"}, {"Quarta", "7:30-8:15"}, {"Quarta", "8:15-9:00"}, {"Quarta", "9:00-9:45"}, {"Quarta", "10:05-10:50"},{"Quarta", "10:50-11:35"},{"Quarta", "11:35-12:20"}, {"Quinta", "7:30-8:15"}, {"Quinta", "8:15-9:00"}, {"Quinta", "9:00-9:45"}, {"Quinta", "10:05-10:50"},{"Quinta", "10:50-11:35"},{"Quinta", "11:35-12:20"}}},
         {"Bianca", {"Espanhol"}, {{"Segunda", "10:50-11:35"},{"Segunda", "11:35-12:20"}, {"Quinta", "10:50-11:35"},{"Quinta", "11:35-12:20"}}},
         {"Denise", {"Inglês"},{{"Segunda", "9:00-9:45"}, {"Segunda", "10:05-10:50"},{"Segunda", "10:50-11:35"},{"Segunda", "11:35-12:20"}, {"Quarta", "9:00-9:45"}, {"Quarta", "10:05-10:50"},{"Quarta", "10:50-11:35"},{"Quarta", "11:35-12:20"}}},
         {"Camila R.", {"Educ. Socioemocional"}, { {"Terça", "9:00-9:45"}, {"Terça", "10:05-10:50"},{"Terça", "10:50-11:35"},{"Terça", "11:35-12:20"}}},
@@ -146,8 +146,8 @@ void setupDadosExemplo(
 
 int main() {
     // Mudar a página de código do console para UTF-8
-    SetConsoleOutputCP(CP_UTF8);
-    setvbuf(stdout, nullptr, _IOFBF, 1000);
+    // SetConsoleOutputCP(CP_UTF8);
+    // setvbuf(stdout, nullptr, _IOFBF, 1000);
 
     std::vector<Professor> professores;
     std::vector<Disciplina> disciplinas;
