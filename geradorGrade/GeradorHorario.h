@@ -88,6 +88,12 @@ private:
     std::vector<RequisicaoAlocacao> requisicoes;
     std::vector<Aula> gradeHoraria;
 
+        // Funções auxiliares para exportação 
+    std::string obterDataHoraAtual() const;
+    std::string getDiaNome(int dia) const;
+    std::string getHorarioInicio(int hora) const;
+    std::string getHorarioFim(int hora) const;
+
     // Configurações
     ConfiguracaoGerador configuracao;
 
@@ -134,4 +140,10 @@ private:
     void log(const std::string& mensagem, bool forcarExibicao = false) const;
     void logErro(const std::string& mensagem) const;
     void logAviso(const std::string& mensagem) const;
+
+     void log(const std::string& mensagem, bool forcarExibicao = false) const;
+    void logErro(const std::string& mensagem) const;
+    void logAviso(const std::string& mensagem) const;
+
+
 };

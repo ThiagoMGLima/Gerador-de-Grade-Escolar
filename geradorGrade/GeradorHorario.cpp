@@ -8,6 +8,10 @@
 #include <sstream>
 #include <queue>
 
+#include "json.hpp"
+
+using json = nlohmann::json;
+
 // Construtor melhorado
 GeradorHorario::GeradorHorario(
     std::vector<Professor> profs, std::vector<Disciplina> disc,
@@ -828,99 +832,60 @@ void GeradorHorario::exportarJSON(const std::string& nomeArquivo) const {
     }
 
     auto stats = obterEstatisticasDetalhadas();
+    json j; // Objeto JSON principal
 
-    arquivo << "{\n";
+    // Metadata
+    j["metadata"]["versao"] = "2.0";
+    j["metadata"]["geradoEm"] = obterDataHoraAtual();
+    j["metadata"]["totalAulas"] = stats.totalAulas;
+    j["metadata"]["aulasAlocadas"] = stats.aulasAlocadas;
+    j["metadata"]["taxaSucesso"] = (stats.totalAulas > 0) ? (stats.aulasAlocadas * 100.0 / stats.totalAulas) : 0.0;
+    j["metadata"]["turmas"] = json::array();
+    for (const auto& t : turmas) j["metadata"]["turmas"].push_back(t.nome);
+    j["metadata"]["dias"] = {"Segunda", "Terça", "Quarta", "Quinta", "Sexta"};
+    j["metadata"]["horarios"] = {"7:30-8:15", "8:15-9:00", "9:00-9:45", "10:05-10:50", "10:50-11:35", "11:35-12:20"};
 
-    // Metadata expandida
-    arquivo << "  \"metadata\": {\n";
-    arquivo << "    \"versao\": \"2.0\",\n";
-    arquivo << "    \"geradoEm\": \"" << obterDataHoraAtual() << "\",\n";
-    arquivo << "    \"totalAulas\": " << stats.totalAulas << ",\n";
-    arquivo << "    \"aulasAlocadas\": " << stats.aulasAlocadas << ",\n";
-    arquivo << "    \"taxaSucesso\": " << std::fixed << std::setprecision(2)
-            << (stats.aulasAlocadas * 100.0 / stats.totalAulas) << ",\n";
-
-    arquivo << "    \"turmas\": [";
-    for (size_t i = 0; i < turmas.size(); i++) {
-        arquivo << "\"" << turmas[i].nome << "\"";
-        if (i < turmas.size() - 1) arquivo << ", ";
-    }
-    arquivo << "],\n";
-
-    arquivo << "    \"dias\": [\"Segunda\", \"Terça\", \"Quarta\", \"Quinta\", \"Sexta\"],\n";
-    arquivo << "    \"horarios\": [\"7:30-8:15\", \"8:15-9:00\", \"9:00-9:45\", \"10:05-10:50\", \"10:50-11:35\", \"11:35-12:20\"]\n";
-    arquivo << "  },\n";
-
-    // Aulas com mais informações
-    arquivo << "  \"aulas\": [\n";
+    // Aulas
+    j["aulas"] = json::array();
     for (size_t i = 0; i < gradeHoraria.size(); i++) {
         const auto& aula = gradeHoraria[i];
-        arquivo << "    {\n";
-        arquivo << "      \"id\": " << i + 1 << ",\n";
-        arquivo << "      \"turma\": \"" << mapaNomesTurmas.at(aula.idTurma) << "\",\n";
-        arquivo << "      \"turmaId\": " << aula.idTurma << ",\n";
-        arquivo << "      \"disciplina\": \"" << mapaNomesDisciplinas.at(aula.idDisciplina) << "\",\n";
-        arquivo << "      \"disciplinaId\": " << aula.idDisciplina << ",\n";
-        arquivo << "      \"professor\": \"" << mapaNomesProfessores.at(aula.idProfessor) << "\",\n";
-        arquivo << "      \"professorId\": " << aula.idProfessor << ",\n";
-        arquivo << "      \"sala\": \"" << mapaNomesSalas.at(aula.idSala) << "\",\n";
-        arquivo << "      \"salaId\": " << aula.idSala << ",\n";
-        arquivo << "      \"dia\": " << aula.slot.dia << ",\n";
-        arquivo << "      \"diaNome\": \"" << getDiaNome(aula.slot.dia) << "\",\n";
-        arquivo << "      \"hora\": " << aula.slot.hora << ",\n";
-        arquivo << "      \"horarioInicio\": \"" << getHorarioInicio(aula.slot.hora) << "\",\n";
-        arquivo << "      \"horarioFim\": \"" << getHorarioFim(aula.slot.hora) << "\"\n";
-        arquivo << "    }";
-        if (i < gradeHoraria.size() - 1) arquivo << ",";
-        arquivo << "\n";
+        json j_aula;
+        j_aula["id"] = i + 1;
+        j_aula["turma"] = mapaNomesTurmas.at(aula.idTurma);
+        j_aula["turmaId"] = aula.idTurma;
+        j_aula["disciplina"] = mapaNomesDisciplinas.at(aula.idDisciplina);
+        j_aula["disciplinaId"] = aula.idDisciplina;
+        j_aula["professor"] = mapaNomesProfessores.at(aula.idProfessor);
+        j_aula["professorId"] = aula.idProfessor;
+        j_aula["sala"] = mapaNomesSalas.at(aula.idSala);
+        j_aula["salaId"] = aula.idSala;
+        j_aula["dia"] = aula.slot.dia;
+        j_aula["diaNome"] = getDiaNome(aula.slot.dia);
+        j_aula["hora"] = aula.slot.hora;
+        j_aula["horarioInicio"] = getHorarioInicio(aula.slot.hora);
+        j_aula["horarioFim"] = getHorarioFim(aula.slot.hora);
+        j["aulas"].push_back(j_aula);
     }
-    arquivo << "  ],\n";
 
-    // Estatísticas expandidas
-    arquivo << "  \"estatisticas\": {\n";
-
-    // Aulas por turma
-    arquivo << "    \"aulasPorTurma\": {\n";
-    bool primeiro = true;
+    // Estatísticas
     for (const auto& [idTurma, qtd] : stats.aulasPorTurma) {
-        if (!primeiro) arquivo << ",\n";
-        arquivo << "      \"" << mapaNomesTurmas.at(idTurma) << "\": " << qtd;
-        primeiro = false;
+        j["estatisticas"]["aulasPorTurma"][mapaNomesTurmas.at(idTurma)] = qtd;
     }
-    arquivo << "\n    },\n";
-
-    // Aulas por professor
-    arquivo << "    \"aulasPorProfessor\": {\n";
-    primeiro = true;
     for (const auto& [idProf, qtd] : stats.aulasPorProfessor) {
-        if (!primeiro) arquivo << ",\n";
-        arquivo << "      \"" << mapaNomesProfessores.at(idProf) << "\": " << qtd;
-        primeiro = false;
+        j["estatisticas"]["aulasPorProfessor"][mapaNomesProfessores.at(idProf)] = qtd;
     }
-    arquivo << "\n    },\n";
-
-    // Aulas por dia
-    arquivo << "    \"aulasPorDia\": {\n";
-    const std::vector<std::string> diasNomes = {"Segunda", "Terça", "Quarta", "Quinta", "Sexta"};
     for (int d = 0; d < 5; d++) {
-        if (d > 0) arquivo << ",\n";
-        arquivo << "      \"" << diasNomes[d] << "\": " << stats.aulasPorDia[d];
+        j["estatisticas"]["aulasPorDia"][getDiaNome(d)] = stats.aulasPorDia.count(d) ? stats.aulasPorDia.at(d) : 0;
     }
-    arquivo << "\n    },\n";
+    j["estatisticas"]["qualidade"]["janelasHorario"] = stats.janelasHorario;
+    j["estatisticas"]["qualidade"]["conflitos"] = stats.conflitos;
 
-    // Qualidade
-    arquivo << "    \"qualidade\": {\n";
-    arquivo << "      \"janelasHorario\": " << stats.janelasHorario << ",\n";
-    arquivo << "      \"conflitos\": " << stats.conflitos << "\n";
-    arquivo << "    }\n";
-
-    arquivo << "  }\n";
-    arquivo << "}\n";
+    // Escreve o JSON formatado no arquivo (indentação de 2 espaços)
+    arquivo << std::setw(2) << j << std::endl;
 
     arquivo.close();
     log("Grade exportada para: " + nomeArquivo, true);
 }
-
 // Funções auxiliares para exportação
 std::string GeradorHorario::obterDataHoraAtual() const {
     auto now = std::chrono::system_clock::now();

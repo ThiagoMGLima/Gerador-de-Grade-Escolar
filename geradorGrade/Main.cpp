@@ -129,7 +129,7 @@ void setupDadosExemplo(
 
             // Cria uma requisição para CADA AULA necessária
             for (int i = 0; i < aulasNecessarias; ++i) {
-                reqs.push_back({ idTurma, idDisciplina, idProfessor, 0.0, false });
+                reqs.push_back({ idTurma, idDisciplina, idProfessor });
             }
         }
     }
@@ -270,7 +270,14 @@ int main() {
             std::cout << "      INICIANDO FASE 2: MELHORAMENTO" << std::endl;
             std::cout << "========================================" << std::endl;
 
-            // Configura e executa o Simulated Annealing
+            /// Criar a configuração primeiro
+            ConfiguracaoSA configSA;
+            configSA.numIteracoes = 10000;
+            configSA.temperaturaInicial = 100.0;
+            configSA.taxaResfriamento = 0.95;
+            configSA.verboso = true; // Habilita logs detalhados
+
+            // Passar a struct para o construtor
             SimulatedAnnealing sa(
                 gerador.getGradeHoraria(),
                 professores,
@@ -279,12 +286,10 @@ int main() {
                 salas,
                 disponibilidade,
                 turmaSalaMap,
-                10000,    // Número de iterações
-                100.0,    // Temperatura inicial
-                0.95      // Taxa de resfriamento
+                configSA // Passa o objeto de configuração
             );
 
-            sa.executar();
+    sa.executar();
             sa.mostrarEstatisticas();
 
             // Atualiza o gerador com a solução melhorada
