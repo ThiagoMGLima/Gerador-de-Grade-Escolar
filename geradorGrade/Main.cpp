@@ -134,6 +134,7 @@ void setupDadosExemplo(
         }
     }
 
+
     // Mostra resumo dos dados carregados
     std::cout << "\n=== DADOS CARREGADOS ===" << std::endl;
     std::cout << "Turmas: " << turmas.size() << std::endl;

@@ -434,26 +434,44 @@ function excluirTurma(id) {
 function contarProfessoresAfetados(turmaId) {
     // Contar quantos professores seriam afetados pela exclusão da turma
     let count = 0;
+
     dados.professores.forEach(prof => {
-        const disc = dados.disciplinas.find(d => d.id === prof.disciplinaId);
-        if (disc) {
-            const cargaTotal = Object.values(disc.cargaHoraria).reduce((a, b) => a + b, 0);
-            if (prof.disponibilidade.length < cargaTotal) {
-                analise.professoresComCargaInsuficiente.push({
-                    professor: prof,
-                    disciplina: disc,
-                    disponivel: prof.disponibilidade.length,
-                    necessario: cargaTotal
-                });
+        const disciplina = dados.disciplinas.find(d => d.id === prof.disciplinaId);
+        if (disciplina && disciplina.cargaHoraria[turmaId] > 0) {
+            // Este professor dá aula para esta turma
+            count++;
+        }
+    });
+
+    return count;
+}
+
+// Adicionar também uma função para analisar impacto completo
+function analisarImpactoExclusaoTurma(turmaId) {
+    const impacto = {
+        professoresAfetados: [],
+        disciplinasAfetadas: [],
+        totalAulasRemovidas: 0
+    };
+
+    // Analisar disciplinas afetadas
+    dados.disciplinas.forEach(disc => {
+        if (disc.cargaHoraria[turmaId] > 0) {
+            impacto.disciplinasAfetadas.push({
+                disciplina: disc,
+                aulasRemovidas: disc.cargaHoraria[turmaId]
+            });
+            impacto.totalAulasRemovidas += disc.cargaHoraria[turmaId];
+
+            // Encontrar professor desta disciplina
+            const professor = dados.professores.find(p => p.disciplinaId === disc.id);
+            if (professor && !impacto.professoresAfetados.some(p => p.id === professor.id)) {
+                impacto.professoresAfetados.push(professor);
             }
         }
     });
 
-    // Analisar salas
-    const salasNormais = dados.salas.filter(s => !s.compartilhada).length;
-    analise.salasInsuficientes = salasNormais < dados.turmas.length;
-
-    return analise;
+    return impacto;
 }
 
 function atualizarAnaliseDetalhada(analise) {
@@ -2278,7 +2296,7 @@ function exportarDados() {
     Notificacao.mostrar("Dados exportados com sucesso!", "success");
 }
 
-function exportarCodigo() {
+function exportarCodigoMelhorado() {
     if (!validarDados()) {
         Notificacao.mostrar("Corrija os erros críticos antes de exportar", "error");
         return;
@@ -2312,7 +2330,15 @@ void setupDadosExemplo(
 
     // Turmas
     dados.turmas.forEach(t => {
-        cppCode += `    turmas.push_back({${t.id}, "${t.nome}"});\n`;
+        cppCode += `    turmas.push_back({${t.id}, "${t.nome}", "${t.serie || ""}", `;
+
+        // Mapear turno
+        const turnoMap = {
+            'manha': 'Turno::MANHA',
+            'tarde': 'Turno::TARDE',
+            'noite': 'Turno::NOITE'
+        };
+        cppCode += `${turnoMap[t.turno] || 'Turno::MANHA'}, 30});\n`;
     });
 
     cppCode += `\n    // === DISCIPLINAS ===\n`;
@@ -2323,6 +2349,7 @@ void setupDadosExemplo(
         cppCode += `        Disciplina disc;\n`;
         cppCode += `        disc.id = ${d.id};\n`;
         cppCode += `        disc.nome = "${d.nome}";\n`;
+        cppCode += `        disc.codigo = "${d.codigo || d.nome.substring(0, 3).toUpperCase()}";\n`;
 
         Object.entries(d.cargaHoraria).forEach(([turmaId, carga]) => {
             if (carga > 0) {
@@ -2336,9 +2363,15 @@ void setupDadosExemplo(
 
     cppCode += `\n    // === PROFESSORES ===\n`;
 
-    // Professores
+    // Professores com informações completas
     dados.professores.forEach(p => {
-        cppCode += `    profs.push_back({${p.id}, "${p.nome}"});\n`;
+        cppCode += `    profs.push_back({${p.id}, "${p.nome}", `;
+        cppCode += `"${p.email || ""}", "${p.telefone || ""}", 40});\n`;
+
+        // Adicionar disciplina habilitada
+        if (p.disciplinaId) {
+            cppCode += `    profs.back().disciplinasHabilitadas.insert(${p.disciplinaId});\n`;
+        }
     });
 
     cppCode += `\n    // === DISPONIBILIDADE DOS PROFESSORES ===\n`;
@@ -2355,9 +2388,17 @@ void setupDadosExemplo(
 
     cppCode += `\n    // === SALAS ===\n`;
 
-    // Salas
+    // Salas com tipo correto
     dados.salas.forEach(s => {
-        cppCode += `    salas.push_back({${s.id}, "${s.nome}", ${s.compartilhada ? 'true' : 'false'}});\n`;
+        const tipoMap = {
+            'normal': 'TipoSala::NORMAL',
+            'laboratorio': 'TipoSala::LABORATORIO',
+            'quadra': 'TipoSala::QUADRA',
+            'biblioteca': 'TipoSala::BIBLIOTECA'
+        };
+
+        cppCode += `    salas.push_back({${s.id}, "${s.nome}", ${s.compartilhada ? 'true' : 'false'}, `;
+        cppCode += `${tipoMap[s.tipo] || 'TipoSala::NORMAL'}, ${s.capacidade || 30}});\n`;
     });
 
     cppCode += `\n    // === ASSOCIAÇÃO TURMA-SALA ===\n`;
@@ -2370,22 +2411,76 @@ void setupDadosExemplo(
         }
     });
 
+    cppCode += `\n    // === DISPONIBILIDADE TOTAL DOS PROFESSORES ===\n`;
+    cppCode += `    std::map<int, int> disponibilidadeTotalProf;\n`;
+
+    dados.professores.forEach(p => {
+        cppCode += `    disponibilidadeTotalProf[${p.id}] = ${p.disponibilidade.length};\n`;
+    });
+
     cppCode += `\n    // === REQUISIÇÕES DE ALOCAÇÃO ===\n`;
-    cppCode += `    // Gerar requisições baseadas nas disciplinas e professores\n`;
-    cppCode += `    for (const auto& disc : discs) {\n`;
-    cppCode += `        // Encontrar professor para esta disciplina\n`;
-    cppCode += `        int idProfessor = -1;\n`;
-    cppCode += `        // (Implementar lógica de busca do professor)\n`;
-    cppCode += `        \n`;
-    cppCode += `        for (const auto& [idTurma, qtdAulas] : disc.aulasPorTurma) {\n`;
-    cppCode += `            for (int i = 0; i < qtdAulas; i++) {\n`;
-    cppCode += `                reqs.push_back({idTurma, disc.id, idProfessor, 0.0, false});\n`;
-    cppCode += `            }\n`;
-    cppCode += `        }\n`;
-    cppCode += `    }\n`;
+    cppCode += `    // Gerar requisições com mapeamento correto professor-disciplina\n`;
+
+    // Criar mapa professor->disciplina
+    const profDiscMap = {};
+    dados.professores.forEach(p => {
+        if (p.disciplinaId) {
+            profDiscMap[p.disciplinaId] = p.id;
+        }
+    });
+
+    // Gerar requisições
+    dados.disciplinas.forEach(disc => {
+        const profId = profDiscMap[disc.id];
+        if (!profId) {
+            cppCode += `    // AVISO: Disciplina "${disc.nome}" sem professor atribuído!\n`;
+            return;
+        }
+
+        Object.entries(disc.cargaHoraria).forEach(([turmaId, qtdAulas]) => {
+            if (qtdAulas > 0) {
+                cppCode += `    // ${qtdAulas} aula(s) de ${disc.nome} para turma ${turmaId}\n`;
+                cppCode += `    for (int i = 0; i < ${qtdAulas}; i++) {\n`;
+                cppCode += `        reqs.push_back({${turmaId}, ${disc.id}, ${profId}, 0.0});\n`;
+                cppCode += `    }\n`;
+            }
+        });
+    });
+
+    cppCode += `\n    // === CONFIGURAÇÃO DO GERADOR ===\n`;
+    cppCode += `    ConfiguracaoGerador config;\n`;
+    cppCode += `    config.verboso = true;\n`;
+    cppCode += `    config.priorizarMinimoJanelas = true;\n`;
+    cppCode += `    config.distribuirAulasUniformemente = true;\n`;
+    cppCode += `    config.evitarAulasExtremos = true;\n`;
+
+    cppCode += `\n    // Criar gerador e executar\n`;
+    cppCode += `    GeradorHorario gerador(profs, discs, turmas, salas, reqs,\n`;
+    cppCode += `                          disponibilidade, disponibilidadeTotalProf, turmaSalaMap, config);\n`;
     cppCode += `}\n`;
 
-    // Mostrar código em modal
+    // Adicionar também uma versão standalone main()
+    cppCode += `\n// === FUNÇÃO MAIN PARA TESTE DIRETO ===\n`;
+    cppCode += `/*\nint main() {\n`;
+    cppCode += `    std::vector<Professor> professores;\n`;
+    cppCode += `    std::vector<Disciplina> disciplinas;\n`;
+    cppCode += `    std::vector<Turma> turmas;\n`;
+    cppCode += `    std::vector<Sala> salas;\n`;
+    cppCode += `    std::vector<RequisicaoAlocacao> requisicoes;\n`;
+    cppCode += `    std::set<std::tuple<int, int, int>> disponibilidade;\n`;
+    cppCode += `    std::map<int, int> turmaSalaMap;\n\n`;
+    cppCode += `    setupDadosExemplo(professores, disciplinas, turmas, salas,\n`;
+    cppCode += `                     requisicoes, disponibilidade, turmaSalaMap);\n\n`;
+    cppCode += `    // Executar geração...\n`;
+    cppCode += `    return 0;\n`;
+    cppCode += `}\n*/`;
+
+    // Mostrar código em modal (usar a função existente)
+    mostrarCodigoModal(cppCode);
+}
+
+// Função auxiliar para mostrar o modal
+function mostrarCodigoModal(cppCode) {
     const modal = criarModal({
         titulo: '📄 Código C++ Gerado',
         conteudo: `
@@ -2413,28 +2508,30 @@ void setupDadosExemplo(
 
     modal.abrir();
 
-    // Funções auxiliares para o modal
-    window.copiarCodigo = function() {
-        const textarea = document.getElementById('codigoGerado');
-        navigator.clipboard.writeText(textarea.value)
-            .then(() => {
-                Notificacao.mostrar('Código copiado!', 'success');
-            })
-            .catch(() => {
-                Notificacao.mostrar('Falha ao copiar o código', 'error');
-            });
-    };
-
-    window.baixarCodigo = function() {
-        const blob = new Blob([cppCode], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'dados_grade_horaria.cpp';
-        link.click();
-        URL.revokeObjectURL(url);
-    };
+    // Armazenar código para as funções de copiar/baixar
+    window.codigoGeradoAtual = cppCode;
 }
+
+// Atualizar funções auxiliares
+window.copiarCodigo = function() {
+    navigator.clipboard.writeText(window.codigoGeradoAtual)
+        .then(() => {
+            Notificacao.mostrar('Código copiado!', 'success');
+        })
+        .catch(() => {
+            Notificacao.mostrar('Falha ao copiar o código', 'error');
+        });
+};
+
+window.baixarCodigo = function() {
+    const blob = new Blob([window.codigoGeradoAtual], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'dados_grade_horaria.cpp';
+    link.click();
+    URL.revokeObjectURL(url);
+};
 
 // ========== FUNÇÕES UTILITÁRIAS ==========
 
@@ -2617,3 +2714,275 @@ document.addEventListener('DOMContentLoaded', () => {
     // Log de inicialização
     console.log('Sistema de Cadastro de Grade Horária v2.0 inicializado');
 });
+
+// Adicionar suporte para importação de planilhas
+function importarPlanilha() {
+    const modal = criarModal({
+        titulo: '📊 Importar de Planilha',
+        conteudo: `
+            <div class="import-section">
+                <h4>Escolha o tipo de dados para importar:</h4>
+                <div class="import-options">
+                    <button class="btn btn-outline" onclick="iniciarImportacao('turmas')">
+                        🎓 Turmas
+                    </button>
+                    <button class="btn btn-outline" onclick="iniciarImportacao('disciplinas')">
+                        📚 Disciplinas
+                    </button>
+                    <button class="btn btn-outline" onclick="iniciarImportacao('professores')">
+                        👥 Professores
+                    </button>
+                    <button class="btn btn-outline" onclick="iniciarImportacao('salas')">
+                        🏫 Salas
+                    </button>
+                </div>
+
+                <div class="import-help">
+                    <h5>Formato esperado:</h5>
+                    <p><strong>Turmas:</strong> Nome | Turno</p>
+                    <p><strong>Disciplinas:</strong> Nome | Turma1:Carga1 | Turma2:Carga2...</p>
+                    <p><strong>Professores:</strong> Nome | Email | Telefone | Disciplina | Disponibilidade</p>
+                    <p><strong>Salas:</strong> Nome | Tipo | Compartilhada | Capacidade</p>
+                </div>
+            </div>
+        `,
+        botoes: [{
+            texto: 'Fechar',
+            classe: 'btn-secondary',
+            acao: () => modal.fechar()
+        }]
+    });
+    modal.abrir();
+}
+
+function iniciarImportacao(tipo) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv,.xlsx,.xls';
+
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            processarArquivoImportado(event.target.result, file.name, tipo);
+        };
+
+        if (file.name.endsWith('.csv')) {
+            reader.readAsText(file);
+        } else {
+            reader.readAsBinaryString(file);
+        }
+    };
+
+    input.click();
+}
+
+function processarArquivoImportado(conteudo, nomeArquivo, tipo) {
+    try {
+        let dados = [];
+
+        if (nomeArquivo.endsWith('.csv')) {
+            dados = processarCSV(conteudo);
+        } else {
+            // Para Excel, seria necessário uma biblioteca externa como SheetJS
+            Notificacao.mostrar('Para importar Excel, adicione a biblioteca SheetJS', 'warning');
+            return;
+        }
+
+        importarDadosPorTipo(dados, tipo);
+
+    } catch (error) {
+        Notificacao.mostrar('Erro ao processar arquivo: ' + error.message, 'error');
+    }
+}
+
+function processarCSV(conteudo) {
+    const linhas = conteudo.split('\n');
+    const dados = [];
+
+    // Pular cabeçalho se existir
+    const startIndex = linhas[0].includes('Nome') ? 1 : 0;
+
+    for (let i = startIndex; i < linhas.length; i++) {
+        const linha = linhas[i].trim();
+        if (linha) {
+            const colunas = linha.split(/[,;|\t]/).map(col => col.trim());
+            dados.push(colunas);
+        }
+    }
+
+    return dados;
+}
+
+function importarDadosPorTipo(dadosArray, tipo) {
+    let importados = 0;
+    let erros = [];
+
+    switch (tipo) {
+        case 'turmas':
+            dadosArray.forEach((linha, index) => {
+                if (linha.length >= 2) {
+                    const nome = linha[0];
+                    const turno = linha[1].toLowerCase();
+
+                    if (!dados.turmas.some(t => t.nome === nome)) {
+                        dados.turmas.push({
+                            id: dados.nextId.turma++,
+                            nome: nome,
+                            turno: ['manha', 'tarde', 'noite'].includes(turno) ? turno : 'manha',
+                            criadoEm: new Date().toISOString()
+                        });
+                        importados++;
+                    }
+                } else {
+                    erros.push(`Linha ${index + 1}: formato inválido`);
+                }
+            });
+            break;
+
+        case 'disciplinas':
+            dadosArray.forEach((linha, index) => {
+                if (linha.length >= 1) {
+                    const nome = linha[0];
+                    const cargaHoraria = {};
+
+                    // Processar carga horária (formato: "Turma:Carga")
+                    for (let i = 1; i < linha.length; i++) {
+                        const [turmaNome, carga] = linha[i].split(':');
+                        const turma = dados.turmas.find(t => t.nome === turmaNome.trim());
+                        if (turma && carga) {
+                            cargaHoraria[turma.id] = parseInt(carga) || 0;
+                        }
+                    }
+
+                    if (!dados.disciplinas.some(d => d.nome === nome)) {
+                        dados.disciplinas.push({
+                            id: dados.nextId.disciplina++,
+                            nome: nome,
+                            cargaHoraria: cargaHoraria,
+                            criadoEm: new Date().toISOString()
+                        });
+                        importados++;
+                    }
+                } else {
+                    erros.push(`Linha ${index + 1}: formato inválido`);
+                }
+            });
+            break;
+
+        case 'salas':
+            dadosArray.forEach((linha, index) => {
+                if (linha.length >= 1) {
+                    const nome = linha[0];
+                    const tipo = linha[1] || 'normal';
+                    const compartilhada = linha[2] === 'sim' || linha[2] === 'true';
+                    const capacidade = parseInt(linha[3]) || 30;
+
+                    if (!dados.salas.some(s => s.nome === nome)) {
+                        dados.salas.push({
+                            id: dados.nextId.sala++,
+                            nome: nome,
+                            tipo: tipo,
+                            compartilhada: compartilhada,
+                            capacidade: capacidade,
+                            criadoEm: new Date().toISOString()
+                        });
+                        importados++;
+                    }
+                } else {
+                    erros.push(`Linha ${index + 1}: formato inválido`);
+                }
+            });
+            break;
+    }
+
+    salvarDados();
+    atualizarTodasTabelas();
+
+    // Mostrar resultado
+    let mensagem = `Importados: ${importados} ${tipo}`;
+    if (erros.length > 0) {
+        mensagem += `\nErros: ${erros.length}`;
+    }
+
+    Notificacao.mostrar(mensagem, importados > 0 ? 'success' : 'warning');
+}
+
+// Adicionar validações extras antes de exportar
+function validarDadosCompleto() {
+    const problemas = [];
+
+    // 1. Verificar se todas as turmas têm sala
+    const salasNormais = dados.salas.filter(s => !s.compartilhada).length;
+    if (salasNormais < dados.turmas.length) {
+        problemas.push({
+            tipo: 'erro',
+            mensagem: `Existem ${dados.turmas.length} turmas mas apenas ${salasNormais} salas exclusivas`
+        });
+    }
+
+    // 2. Verificar carga horária total por turma
+    dados.turmas.forEach(turma => {
+        const totalAulas = calcularTotalAulasTurma(turma.id);
+        if (totalAulas > 30) {
+            problemas.push({
+                tipo: 'aviso',
+                mensagem: `Turma "${turma.nome}" tem ${totalAulas} aulas (máximo recomendado: 30)`
+            });
+        }
+    });
+
+    // 3. Verificar disponibilidade x carga dos professores
+    dados.professores.forEach(prof => {
+        const disc = dados.disciplinas.find(d => d.id === prof.disciplinaId);
+        if (disc) {
+            const cargaTotal = Object.values(disc.cargaHoraria).reduce((a, b) => a + b, 0);
+            const disponibilidade = prof.disponibilidade.length;
+
+            if (disponibilidade < cargaTotal) {
+                problemas.push({
+                    tipo: 'erro',
+                    mensagem: `Professor "${prof.nome}": ${disponibilidade}h disponível mas precisa de ${cargaTotal}h`
+                });
+            }
+        }
+    });
+
+    // 4. Verificar conflitos potenciais
+    const horariosOcupados = {};
+    dados.professores.forEach(prof => {
+        prof.disponibilidade.forEach(slot => {
+            const chave = `${slot.dia}-${slot.horario}`;
+            if (!horariosOcupados[chave]) {
+                horariosOcupados[chave] = [];
+            }
+            horariosOcupados[chave].push(prof.nome);
+        });
+    });
+
+    // Verificar se há professores demais no mesmo horário
+    Object.entries(horariosOcupados).forEach(([horario, professores]) => {
+        if (professores.length > dados.salas.length) {
+            problemas.push({
+                tipo: 'aviso',
+                mensagem: `Horário ${horario}: ${professores.length} professores disponíveis mas apenas ${dados.salas.length} salas`
+            });
+        }
+    });
+
+    return problemas;
+}
+
+// Adicionar botão de importação na interface
+function adicionarBotaoImportacao() {
+    const headerActions = document.querySelector('.header-actions');
+    if (headerActions) {
+        const btnImport = document.createElement('button');
+        btnImport.className = 'btn btn-sm btn-outline';
+        btnImport.innerHTML = '📊 Importar Planilha';
+        btnImport.onclick = importarPlanilha;
+        headerActions.appendChild(btnImport);
+    }
+}
