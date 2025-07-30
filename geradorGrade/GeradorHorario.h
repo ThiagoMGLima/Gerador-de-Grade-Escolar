@@ -88,7 +88,7 @@ private:
     std::vector<RequisicaoAlocacao> requisicoes;
     std::vector<Aula> gradeHoraria;
 
-        // Funções auxiliares para exportação 
+        // Funções auxiliares para exportação
     std::string obterDataHoraAtual() const;
     std::string getDiaNome(int dia) const;
     std::string getHorarioInicio(int hora) const;

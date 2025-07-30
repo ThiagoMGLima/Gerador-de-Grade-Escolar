@@ -7,6 +7,7 @@
 #include <random>
 #include <functional>
 #include <memory>
+#include <deque>
 
 // Estrutura para configurações do Simulated Annealing
 struct ConfiguracaoSA {
@@ -169,6 +170,7 @@ private:
     ConfiguracaoSA config;
     EstatisticasSA estatisticas;
     double temperaturaAtual;
+    double melhorCusto;
     bool executando;
 
     // Lista tabu
@@ -231,6 +233,7 @@ private:
     void limparCaches();
     void registrarEstatistica(int iteracao);
     void log(const std::string& mensagem) const;
+    
     std::string formatarTempo(double segundos) const;
 
     // Busca local (melhoria adicional)

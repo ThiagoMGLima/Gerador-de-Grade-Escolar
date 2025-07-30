@@ -259,38 +259,18 @@
 </head>
 <body>
     <div class="container">
-        <h1>📚 Visualizador de Grade Horária</h1>
+        <h1>📚 Visualizador de Dados Cadastrados</h1>
 
         <div class="controls">
             <div class="control-group">
                 <label for="fileInput" class="file-label">
-                    📁 Carregar Grade (JSON)
+                    📁 Carregar Dados (JSON)
                 </label>
                 <input type="file" id="fileInput" accept=".json">
             </div>
-
-            <div class="control-group">
-                <label for="viewSelect">Visualizar:</label>
-                <select id="viewSelect">
-                    <option value="turma">Por Turma</option>
-                    <option value="professor">Por Professor</option>
-                    <option value="sala">Por Sala</option>
-                </select>
-            </div>
-
-            <div class="control-group" id="filterGroup">
-                <label for="filterSelect">Filtrar:</label>
-                <select id="filterSelect">
-                    <option value="">Todos</option>
-                </select>
-            </div>
         </div>
 
-        <div id="scheduleContainer"></div>
-
-        <div class="legend" id="legend"></div>
-
-        <div class="stats-container" id="statsContainer"></div>
+        <div id="dataContainer"></div>
     </div>
     <script>
         let gradeData = null;
@@ -304,9 +284,15 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     try {
-                        gradeData = JSON.parse(e.target.result);
-                        processData();
-                        updateView();
+                        dadosCadastrados = JSON.parse(e.target.result);
+                        if (dadosCadastrados.aulas) {
+                            // É um arquivo de grade horária
+                            window.location.href = 'Visualizador.html';
+                            alert('Este é um arquivo de grade horária. Use o Visualizador de Grade Horária.');
+                        } else {
+                            // É um arquivo de dados cadastrados
+                            visualizarDados();
+                        }
                     } catch (error) {
                         alert('Erro ao carregar arquivo JSON: ' + error.message);
                     }
