@@ -113,7 +113,7 @@ std::string processarGradeHoraria(std::string dadosJSON) {
                               disponibilidade, disponibilidadeTotalProf, turmaSalaMap, config);
 
         // Tentar gerar grade
-        for (int tentativa = 1; tentativa <= 100; tentativa++) {
+        for (int tentativa = 1; tentativa <= 100000; tentativa++) {
             if (gerador.gerarHorario()) {
                 // Exportar resultado
                 json resultado;

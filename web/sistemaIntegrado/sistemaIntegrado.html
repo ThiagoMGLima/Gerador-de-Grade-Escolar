@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Integrado de Grade Horária</title>
+    <link rel="stylesheet" href="styleIntegrado.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 Sistema Integrado de Grade Horária</h1>
+
+        <div class="workflow">
+            <h2>Fluxo de Trabalho:</h2>
+
+            <!-- Passo 1: Carregar dados -->
+            <div class="step">
+                <h3>1. Carregar Dados Cadastrados</h3>
+                <input type="file" id="fileInput" accept=".json">
+                <button class="btn-primary" onclick="carregarDados()">
+                    📂 Carregar Arquivo
+                </button>
+            </div>
+
+            <!-- Passo 2: Processar -->
+            <div class="step">
+                <h3>2. Gerar Grade Horária</h3>
+                <button class="btn-success" onclick="gerarGrade()" disabled id="btnGerar">
+                    ⚙️ Processar com C++
+                </button>
+                <div id="progressBar">
+                    <div class="progress"></div>
+                </div>
+            </div>
+
+            <!-- Passo 3: Visualizar -->
+            <div class="step">
+                <h3>3. Visualizar Resultado</h3>
+                <button class="btn-primary" onclick="visualizarGrade()" disabled id="btnVisualizar">
+                    👁️ Abrir Visualizador
+                </button>
+                <button class="btn-primary" onclick="baixarGrade()" disabled id="btnBaixar">
+                    💾 Baixar Grade
+                </button>
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div id="status" class="status"></div>
+
+        <!-- Preview dos dados -->
+        <div id="preview" style="margin-top: 20px;"></div>
+    </div>
+
+    <!-- Carregar módulo WebAssembly -->
+    <script src="gerador.js"></script>
+
+    <script src="scriptIntegrado.js"></script>
+</body>
+</html>

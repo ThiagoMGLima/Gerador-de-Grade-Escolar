@@ -18,7 +18,7 @@ emcc -O2 \
     src/geradorGrade/GeradorWeb.cpp \
     src/geradorGrade/GeradorHorario.cpp \
     src/geradorGrade/SimulatedAnnealing.cpp \
-    -I./src/geradorArquivos \
+    -I./src/geradorGrade \
     -s WASM=1 \
     -s EXPORTED_RUNTIME_METHODS='["ccall", "cwrap"]' \
     -s ALLOW_MEMORY_GROWTH=1 \
@@ -28,7 +28,7 @@ emcc -O2 \
     -s SINGLE_FILE=1 \
     --bind \
     -std=c++17 \
-    -o web/sistemaCadastro/gerador.js
+    -o web/sistemaIntegrado/gerador.js
 
 if [ $? -eq 0 ]; then
     echo "✓ Compilação concluída com sucesso!"

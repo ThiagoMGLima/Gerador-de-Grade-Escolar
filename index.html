@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Grade Horária Escolar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .option-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .option-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+        }
+
+        .option-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .option-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .option-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+            text-align: center;
+        }
+
+        .option-title {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .option-description {
+            color: #666;
+            line-height: 1.6;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .option-features {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .option-features li {
+            padding: 8px 0;
+            color: #555;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-features li::before {
+            content: '✓';
+            color: #4CAF50;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .option-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .option-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .new-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+
+        .recommended-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #ff9800;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .workflow-hint {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 50px;
+            text-align: center;
+            color: white;
+            backdrop-filter: blur(10px);
+            animation: fadeIn 1.5s ease-out;
+        }
+
+        .workflow-hint h3 {
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .workflow-steps {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .workflow-step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-number {
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .step-arrow {
+            font-size: 1.5rem;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+            animation: fadeIn 2s ease-out;
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+            transition: opacity 0.3s;
+        }
+
+        .footer a:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        /* Animações */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+            }
+
+            .options-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .option-card {
+                padding: 30px 20px;
+            }
+
+            .workflow-steps {
+                flex-direction: column;
+            }
+
+            .step-arrow {
+                transform: rotate(90deg);
+            }
+        }
+
+        /* Efeito de partículas no background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            from {
+                transform: translateY(100vh) rotate(0deg);
+            }
+            to {
+                transform: translateY(-100px) rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Partículas de fundo -->
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <!-- Cabeçalho -->
+        <header class="header">
+            <h1>📚 Sistema de Grade Horária Escolar</h1>
+            <p>Gerencie horários escolares de forma inteligente e automatizada.
+               Escolha uma opção abaixo para começar.</p>
+        </header>
+
+        <!-- Opções principais -->
+        <div class="options-container">
+            <!-- Opção 1: Cadastrar Dados -->
+            <div class="option-card" onclick="navegarPara('web/sistemaCadastro/sistemaCadastro.html')">
+                <span class="recommended-badge">Recomendado</span>
+                <span class="option-icon">📝</span>
+                <h2 class="option-title">Cadastrar Dados</h2>
+                <p class="option-description">
+                    Configure todas as informações necessárias para gerar a grade horária perfeita para sua escola.
+                </p>
+                <ul class="option-features">
+                    <li>Cadastre turmas e turnos</li>
+                    <li>Configure disciplinas e cargas horárias</li>
+                    <li>Adicione professores e disponibilidades</li>
+                    <li>Registre salas e recursos</li>
+                    <li>Exporte dados para processamento</li>
+                </ul>
+                <button class="option-button">
+                    Começar Cadastro →
+                </button>
+            </div>
+
+            <!-- Opção 2: Gerar Grade -->
+            <div class="option-card" onclick="navegarPara('web/sistemaIntegrado/sistemaIntegrado.html')">
+                <span class="new-badge">Novo!</span>
+                <span class="option-icon">⚙️</span>
+                <h2 class="option-title">Gerar Grade</h2>
+                <p class="option-description">
+                    Processe dados já cadastrados e gere automaticamente a grade horária otimizada.
+                </p>
+                <ul class="option-features">
+                    <li>Carregue arquivo JSON de dados</li>
+                    <li>Processamento via WebAssembly (C++)</li>
+                    <li>Algoritmo inteligente de otimização</li>
+                    <li>Visualização instantânea dos resultados</li>
+                    <li>Exporte a grade finalizada</li>
+                </ul>
+                <button class="option-button">
+                    Gerar Grade →
+                </button>
+            </div>
+        </div>
+
+        <!-- Dica de fluxo de trabalho -->
+        <div class="workflow-hint">
+            <h3>💡 Fluxo de Trabalho Recomendado</h3>
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <div class="step-number">1</div>
+                    <span>Cadastrar Dados</span>
+                </div>
+                <span class="step-arrow">→</span>
+                <div class="workflow-step">
+                    <div class="step-number">2</div>
+                    <span>Exportar JSON</span>
+                </div>
+                <span class="step-arrow">→</span>
+                <div class="workflow-step">
+                    <div class="step-number">3</div>
+                    <span>Gerar Grade</span>
+                </div>
+                <span class="step-arrow">→</span>
+                <div class="workflow-step">
+                    <div class="step-number">4</div>
+                    <span>Visualizar</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rodapé -->
+        <footer class="footer">
+            <p>Sistema de Grade Horária v2.0 |
+               <a href="#" onclick="mostrarAjuda()">Ajuda</a> |
+               <a href="#" onclick="mostrarSobre()">Sobre</a> |
+               <a href="web/visualizador/Visualizador.html">Visualizador</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Criar partículas animadas no fundo
+        function criarParticulas() {
+            const container = document.getElementById('particles');
+            const numParticulas = 50;
+
+            for (let i = 0; i < numParticulas; i++) {
+                const particula = document.createElement('div');
+                particula.className = 'particle';
+
+                // Tamanho aleatório
+                const tamanho = Math.random() * 5 + 2;
+                particula.style.width = tamanho + 'px';
+                particula.style.height = tamanho + 'px';
+
+                // Posição horizontal aleatória
+                particula.style.left = Math.random() * 100 + '%';
+
+                // Delay aleatório
+                particula.style.animationDelay = Math.random() * 20 + 's';
+
+                // Duração aleatória
+                particula.style.animationDuration = (Math.random() * 20 + 20) + 's';
+
+                container.appendChild(particula);
+            }
+        }
+
+        // Navegação
+        function navegarPara(url) {
+            // Adicionar efeito de transição
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                window.location.href = url;
+            }, 300);
+        }
+
+        // Modal de Ajuda
+        function mostrarAjuda() {
+            alert(`
+🔍 COMO USAR O SISTEMA:
+
+1️⃣ PRIMEIRA VEZ?
+   → Clique em "Cadastrar Dados"
+   → Configure turmas, disciplinas, professores e salas
+   → Exporte os dados em formato JSON
+
+2️⃣ JÁ TEM OS DADOS?
+   → Clique em "Gerar Grade"
+   → Carregue o arquivo JSON exportado
+   → Aguarde o processamento
+   → Visualize e baixe a grade gerada
+
+💡 DICAS:
+   • Certifique-se de cadastrar TODOS os dados antes de gerar
+   • O sistema validará automaticamente os dados
+   • Use um navegador moderno (Chrome, Firefox, Edge)
+            `);
+        }
+
+        // Modal Sobre
+        function mostrarSobre() {
+            alert(`
+📚 SISTEMA DE GRADE HORÁRIA ESCOLAR
+   Versão 2.0
+
+🎯 OBJETIVO:
+   Automatizar a criação de grades horárias escolares
+   utilizando algoritmos inteligentes de otimização.
+
+🔧 TECNOLOGIAS:
+   • Frontend: HTML5, CSS3, JavaScript
+   • Backend: C++ compilado para WebAssembly
+   • Algoritmos: Backtracking + Simulated Annealing
+
+👨‍💻 RECURSOS:
+   • Interface intuitiva
+   • Processamento no navegador (sem servidor)
+   • Otimização automática
+   • Exportação em múltiplos formatos
+
+📅 Desenvolvido em 2024
+            `);
+        }
+
+        // Verificar compatibilidade do navegador
+        function verificarCompatibilidade() {
+            if (!window.WebAssembly) {
+                alert('⚠️ Seu navegador não suporta WebAssembly!\n\n' +
+                      'Por favor, use um navegador moderno como:\n' +
+                      '• Google Chrome\n' +
+                      '• Mozilla Firefox\n' +
+                      '• Microsoft Edge\n' +
+                      '• Safari');
+                return false;
+            }
+            return true;
+        }
+
+        // Inicialização
+        window.onload = function() {
+            criarParticulas();
+            verificarCompatibilidade();
+
+            // Adicionar efeito de fade-in
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                document.body.style.transition = 'opacity 0.5s';
+                document.body.style.opacity = '1';
+            }, 100);
+        };
+
+        // Adicionar efeito de hover com tilt nos cards
+        document.querySelectorAll('.option-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+
+                const rotateX = (y - centerY) / 20;
+                const rotateY = (centerX - x) / 20;
+
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>
