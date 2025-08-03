@@ -9,6 +9,11 @@
 #include <memory>
 #include <functional>
 
+#include "json.hpp"
+
+using json = nlohmann::json;
+
+
 // Enums para melhor legibilidade
 enum class StatusAlocacao {
     SUCESSO,
@@ -138,10 +143,6 @@ private:
 
     // Logging
     void log(const std::string& mensagem, bool forcarExibicao = false) const;
-    void logErro(const std::string& mensagem) const;
-    void logAviso(const std::string& mensagem) const;
-
-     void log(const std::string& mensagem, bool forcarExibicao = false) const;
     void logErro(const std::string& mensagem) const;
     void logAviso(const std::string& mensagem) const;
 

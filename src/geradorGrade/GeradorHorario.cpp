@@ -8,10 +8,6 @@
 #include <sstream>
 #include <queue>
 
-#include "json.hpp"
-
-using json = nlohmann::json;
-
 // Construtor melhorado
 GeradorHorario::GeradorHorario(
     std::vector<Professor> profs, std::vector<Disciplina> disc,

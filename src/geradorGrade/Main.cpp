@@ -1,8 +1,11 @@
 #include "GeradorHorario.h"
 #include "SimulatedAnnealing.h"
 #include <map>
-// #include <windows.h>
+#include <fstream>
 #include <chrono>
+#include "json.hpp"
+
+using json = nlohmann::json;
 
 // Função para criar o cenário de exemplo com base nos seus dados
 void setupDadosExemplo(
@@ -134,7 +137,6 @@ void setupDadosExemplo(
         }
     }
 
-
     // Mostra resumo dos dados carregados
     std::cout << "\n=== DADOS CARREGADOS ===" << std::endl;
     std::cout << "Turmas: " << turmas.size() << std::endl;
@@ -144,12 +146,136 @@ void setupDadosExemplo(
     std::cout << "Total de aulas a alocar: " << reqs.size() << std::endl;
 }
 
+void carregarDadosJSON(const std::string& arquivo,
+    std::vector<Professor>& profs,
+    std::vector<Disciplina>& discs,
+    std::vector<Turma>& turmas,
+    std::vector<Sala>& salas,
+    std::vector<RequisicaoAlocacao>& reqs,
+    std::set<std::tuple<int, int, int>>& disponibilidade,
+    std::map<int, int>& turmaSalaMap,
+    std::map<int, int>& disponibilidadeTotalProf) {
 
-int main() {
-    // Mudar a página de código do console para UTF-8
-    // SetConsoleOutputCP(CP_UTF8);
-    // setvbuf(stdout, nullptr, _IOFBF, 1000);
+    std::ifstream file(arquivo);
+    if (!file.is_open()) {
+        std::cerr << "Erro ao abrir arquivo: " << arquivo << std::endl;
+        return;
+    }
 
+    json j;
+    file >> j;
+
+    std::cout << "\n=== CARREGANDO DADOS DO ARQUIVO JSON ===" << std::endl;
+
+    // Carregar turmas
+    for (const auto& t : j["turmas"]) {
+        Turma turma;
+        turma.id = t["id"].get<int>();  // Conversão explícita
+        turma.nome = t["nome"].get<std::string>();  // Conversão explícita
+
+        std::string turnoStr = t["turno"].get<std::string>();  // Conversão explícita
+        if (turnoStr == "manha") turma.turno = Turno::MANHA;
+        else if (turnoStr == "tarde") turma.turno = Turno::TARDE;
+        else if (turnoStr == "noite") turma.turno = Turno::NOITE;
+
+        turmas.push_back(turma);
+    }
+
+    // Carregar disciplinas
+    for (const auto& d : j["disciplinas"]) {
+        Disciplina disc;
+        disc.id = d["id"].get<int>();  // Conversão explícita
+        disc.nome = d["nome"].get<std::string>();  // Conversão explícita
+
+        for (const auto& [turmaId, carga] : d["aulasPorTurma"].items()) {
+            disc.aulasPorTurma[std::stoi(turmaId)] = carga.get<int>();  // Conversão explícita
+        }
+
+        discs.push_back(disc);
+    }
+
+    // Carregar professores e disponibilidade
+    for (const auto& p : j["professores"]) {
+        Professor prof;
+        prof.id = p["id"].get<int>();  // Conversão explícita
+        prof.nome = p["nome"].get<std::string>();  // Conversão explícita
+
+        // CORREÇÃO PRINCIPAL: Conversão explícita para int
+        int disciplinaId = p["idDisciplina"].get<int>();
+        prof.disciplinasHabilitadas.insert(disciplinaId);
+
+        profs.push_back(prof);
+
+        // Inicializar contador de disponibilidade
+        disponibilidadeTotalProf[prof.id] = 0;
+
+        // Carregar disponibilidade
+        for (const auto& disp : p["disponibilidade"]) {
+            int dia = disp["dia"].get<int>();  // Conversão explícita
+            int horario = disp["horario"].get<int>();  // Conversão explícita
+            disponibilidade.insert({prof.id, dia, horario});
+            disponibilidadeTotalProf[prof.id]++;
+        }
+    }
+
+    // Carregar salas
+    for (const auto& s : j["salas"]) {
+        Sala sala;
+        sala.id = s["id"].get<int>();  // Conversão explícita
+        sala.nome = s["nome"].get<std::string>();  // Conversão explícita
+        sala.compartilhada = s["compartilhada"].get<bool>();  // Conversão explícita
+        sala.capacidade = s.contains("capacidade") ? s["capacidade"].get<int>() : 30;
+
+        std::string tipoStr = s["tipo"].get<std::string>();  // Conversão explícita
+        if (tipoStr == "laboratorio") sala.tipo = TipoSala::LABORATORIO;
+        else if (tipoStr == "quadra") sala.tipo = TipoSala::QUADRA;
+        else if (tipoStr == "biblioteca") sala.tipo = TipoSala::BIBLIOTECA;
+        else sala.tipo = TipoSala::NORMAL;
+
+        salas.push_back(sala);
+    }
+
+    // Carregar associações turma-sala
+    if (j.contains("associacoes") && j["associacoes"].contains("turmaSala")) {
+        for (const auto& [turmaId, salaId] : j["associacoes"]["turmaSala"].items()) {
+            turmaSalaMap[std::stoi(turmaId)] = salaId.get<int>();  // Conversão explícita
+        }
+    }
+
+    // Gerar requisições
+    std::cout << "\n=== GERANDO REQUISICOES ===" << std::endl;
+    for (const auto& disc : discs) {
+        // Encontrar professor para esta disciplina
+        int idProfessor = -1;
+        for (const auto& prof : profs) {
+            if (prof.disciplinasHabilitadas.count(disc.id) > 0) {
+                idProfessor = prof.id;
+                break;
+            }
+        }
+
+        if (idProfessor != -1) {
+            for (const auto& [idTurma, qtdAulas] : disc.aulasPorTurma) {
+                std::cout << "  Disciplina " << disc.nome << " para turma " << idTurma
+                          << ": " << qtdAulas << " aulas" << std::endl;
+                for (int i = 0; i < qtdAulas; i++) {
+                    reqs.push_back({idTurma, disc.id, idProfessor});
+                }
+            }
+        } else {
+            std::cerr << "  AVISO: Disciplina " << disc.nome << " sem professor!" << std::endl;
+        }
+    }
+
+    std::cout << "\n=== DADOS CARREGADOS COM SUCESSO ===" << std::endl;
+    std::cout << "Turmas: " << turmas.size() << std::endl;
+    std::cout << "Disciplinas: " << discs.size() << std::endl;
+    std::cout << "Professores: " << profs.size() << std::endl;
+    std::cout << "Salas: " << salas.size() << std::endl;
+    std::cout << "Total de aulas a alocar: " << reqs.size() << std::endl;
+}
+
+int main(int argc, char* argv[]) {
     std::vector<Professor> professores;
     std::vector<Disciplina> disciplinas;
     std::vector<Turma> turmas;
@@ -157,21 +283,40 @@ int main() {
     std::vector<RequisicaoAlocacao> requisicoes;
     std::set<std::tuple<int, int, int>> disponibilidade;
     std::map<int, int> turmaSalaMap;
-
-    setupDadosExemplo(professores, disciplinas, turmas, salas, requisicoes, disponibilidade, turmaSalaMap);
-
-    // Calcula disponibilidade total de cada professor
     std::map<int, int> disponibilidadeTotalProf;
-    for (const auto& p : professores) {
-        disponibilidadeTotalProf[p.id] = 0;
-    }
-    for (const auto& disp : disponibilidade) {
-        disponibilidadeTotalProf[std::get<0>(disp)]++;
+
+    // Verificar se foi passado um arquivo JSON como argumento
+    if (argc > 1) {
+        std::cout << "=== MODO: CARREGAR DE ARQUIVO JSON ===" << std::endl;
+        std::cout << "Arquivo: " << argv[1] << std::endl;
+
+        carregarDadosJSON(argv[1], professores, disciplinas, turmas,
+                         salas, requisicoes, disponibilidade, turmaSalaMap,
+                         disponibilidadeTotalProf);
+    } else {
+        std::cout << "=== MODO: DADOS DE EXEMPLO ===" << std::endl;
+        std::cout << "Para usar dados de um arquivo JSON, execute:" << std::endl;
+        std::cout << "  " << argv[0] << " <arquivo.json>" << std::endl;
+        std::cout << std::endl;
+
+        setupDadosExemplo(professores, disciplinas, turmas, salas,
+                         requisicoes, disponibilidade, turmaSalaMap);
+
+        // Calcular disponibilidade total para dados de exemplo
+        for (const auto& p : professores) {
+            disponibilidadeTotalProf[p.id] = 0;
+        }
+        for (const auto& disp : disponibilidade) {
+            disponibilidadeTotalProf[std::get<0>(disp)]++;
+        }
     }
 
     // FASE 1: Construção Inicial
+    ConfiguracaoGerador config;
+    config.verboso = true;
+
     GeradorHorario gerador(professores, disciplinas, turmas, salas, requisicoes,
-                          disponibilidade, disponibilidadeTotalProf, turmaSalaMap);
+                          disponibilidade, disponibilidadeTotalProf, turmaSalaMap, config);
 
     const int MAX_TENTATIVAS = 100000;
     bool sucesso = false;
@@ -270,14 +415,12 @@ int main() {
             std::cout << "      INICIANDO FASE 2: MELHORAMENTO" << std::endl;
             std::cout << "========================================" << std::endl;
 
-            /// Criar a configuração primeiro
             ConfiguracaoSA configSA;
             configSA.numIteracoes = 10000;
             configSA.temperaturaInicial = 100.0;
             configSA.taxaResfriamento = 0.95;
-            configSA.verboso = true; // Habilita logs detalhados
+            configSA.verboso = true;
 
-            // Passar a struct para o construtor
             SimulatedAnnealing sa(
                 gerador.getGradeHoraria(),
                 professores,
@@ -286,13 +429,12 @@ int main() {
                 salas,
                 disponibilidade,
                 turmaSalaMap,
-                configSA // Passa o objeto de configuração
+                configSA
             );
 
-    sa.executar();
+            sa.executar();
             sa.mostrarEstatisticas();
 
-            // Atualiza o gerador com a solução melhorada
             gerador.setGradeHoraria(sa.getSolucaoFinal());
 
             std::cout << "\n=== GRADE HORARIA FINAL (APOS MELHORAMENTO) ===" << std::endl;
