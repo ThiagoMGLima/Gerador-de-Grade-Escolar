@@ -1,107 +1,230 @@
-# Gerador de Horários Escolares com Otimização
+# 📚 Sistema de Grade Horária Escolar com Otimização
 
-Este projeto é uma aplicação robusta para a geração e otimização de grades horárias escolares, um problema clássico de otimização combinatória. A solução foi desenvolvida em C++ e utiliza uma abordagem de duas fases: primeiro, a construção de uma grade viável através de uma heurística construtiva e, em seguida, o refinamento dessa grade usando a meta-heurística de *Simulated Annealing* (Têmpera Simulada).
+Sistema completo para geração e otimização de grades horárias escolares, desenvolvido em C++ com interface web moderna. Utiliza algoritmos avançados de otimização combinatória e pode ser executado inteiramente no navegador através de WebAssembly.
 
-O projeto inclui também um visualizador web interativo para analisar e inspecionar as grades geradas.
+O projeto implementa uma solução em duas fases: construção inicial via heurística construtiva e refinamento através de *Simulated Annealing*, baseado na dissertação de Camilo José Bornia Poulsen: [Desenvolvimento de um modelo para o School Timetabling Problem baseado na Meta-Heurística Simulated Annealing](http://hdl.handle.net/10183/39522).
 
-A metodologia implementada foi inspirada e baseada nos conceitos apresentados na dissertação de mestrado de Camilo José Bornia Poulsen,  disponível em: [Desenvolvimento de um modelo para o School Timetabling Problem baseado na Meta-Heurística Simulated Annealing](http://hdl.handle.net/10183/39522).
+## 🚀 Principais Funcionalidades
 
-## 🚀 Funcionalidades
+### Sistema de Cadastro Web
+- **Interface Intuitiva:** Sistema completo de cadastro com validação em tempo real
+- **Gerenciamento Completo:** Turmas, disciplinas, professores e salas
+- **Disponibilidade Visual:** Grid interativo para marcar horários disponíveis dos professores
+- **Validação Automática:** Verificação de consistência dos dados antes da exportação
+- **Persistência Local:** Dados salvos automaticamente no navegador
 
-  * **Geração em Duas Fases:** Garante tanto a viabilidade (cumprimento de restrições obrigatórias) quanto a qualidade (otimização de restrições flexíveis) da grade horária.
-  * **Manipulação de Restrições Complexas:**
-      * **Restrições Rígidas (Hard Constraints):** Conflitos de alocação (mesmo professor, turma ou sala em um mesmo horário) e respeito à disponibilidade pré-definida dos professores.
-      * **Restrições Flexíveis (Soft Constraints):** Otimização da grade para minimizar "janelas" na grade dos professores, agrupar aulas da mesma disciplina, e distribuir as aulas de forma equilibrada ao longo da semana.
-  * **Exportação de Dados:** As grades geradas (inicial e otimizada) são exportadas para o formato JSON, permitindo fácil integração com outras ferramentas.
-  * **Visualizador Web Interativo:** Uma interface front-end (HTML, CSS, JS) permite carregar os arquivos JSON e visualizar as grades de forma clara e organizada.
-      * Visualização por Turma, Professor ou Sala.
-      * Filtros dinâmicos para focar em um item específico.
-      * Legenda de cores por disciplina.
-      * Painel com estatísticas de qualidade da grade (distribuição de aulas, carga horária, etc.).
+### Processamento no Navegador
+- **WebAssembly:** Código C++ compilado para rodar diretamente no navegador
+- **Sem Servidor:** Todo processamento acontece localmente
+- **Performance Nativa:** Velocidade comparável à execução desktop
+- **Multiplataforma:** Funciona em qualquer navegador moderno
 
-## ⚙️ Metodologia
+### Visualizador Interativo
+- **Múltiplas Visões:** Por turma, professor ou sala
+- **Filtros Dinâmicos:** Foco em elementos específicos
+- **Estatísticas em Tempo Real:** Análise de qualidade da grade
+- **Exportação:** Download em JSON para uso posterior
 
-O processo para a criação da grade horária é dividido em duas fases principais:
+## ⚙️ Arquitetura do Sistema
 
-### Fase 1: Geração da Solução Inicial (Heurística Construtiva)
+### Fluxo de Trabalho
 
-Nesta fase, o objetivo é gerar uma grade horária **viável**, ou seja, que atenda a todas as restrições rígidas. O algoritmo, implementado na classe `GeradorHorario`, funciona da seguinte maneira:
+```mermaid
+graph LR
+    A[Sistema de Cadastro] --> B[Dados JSON]
+    B --> C[Processador C++/WASM]
+    C --> D[Grade Otimizada]
+    D --> E[Visualizador]
+```
 
-1.  **Análise de Criticidade:** As requisições de alocação de aulas são priorizadas com base em um critério de "criticidade". Este critério considera a razão entre o número de aulas que um professor precisa lecionar e o número total de horários que ele tem disponível. Professores com agendas mais "apertadas" são priorizados.
-2.  **Alocação Aleatorizada e Guiada:** As requisições, ordenadas por criticidade, são alocadas em slots de tempo válidos. Uma pitada de aleatoriedade é usada para embaralhar requisições com criticidade semelhante, evitando um viés determinístico e permitindo a geração de diferentes soluções iniciais a cada execução.
-3.  **Verificação Contínua:** A cada tentativa de alocação, o sistema verifica se o slot escolhido não viola nenhuma restrição rígida.
+### Algoritmos Implementados
 
-O resultado desta fase é o arquivo `grade_horaria.json`, uma solução completa e válida, mas ainda não otimizada em termos de qualidade.
+#### Fase 1: Heurística Construtiva
+- **Análise de Criticidade:** Priorização baseada em disponibilidade
+- **Alocação Inteligente:** Consideração de múltiplas restrições
+- **Backtracking Parcial:** Correção automática de conflitos
 
-### Fase 2: Otimização da Solução (Simulated Annealing)
-
-Com uma solução viável em mãos, a segunda fase foca em **melhorá-la**. O algoritmo de *Simulated Annealing*, implementado na classe `SimulatedAnnealing`, refina a grade com base em um conjunto de restrições flexíveis (soft constraints).
-
-1.  **Função de Custo:** Uma função de custo avalia a "qualidade" de uma grade. A nota é calculada a partir de um sistema de penalidades. A implementação atual penaliza:
-      * **Janelas de Horário:** Espaços vagos entre aulas na grade de um professor.
-      * **Má Distribuição de Aulas:** Concentração de aulas de uma turma em poucos dias.
-      * **Aulas em Horários Extremos:** Alocação de aulas no primeiro ou último horário do dia.
-      * *Bônus* é concedido para aulas consecutivas da mesma disciplina para a mesma turma.
-2.  **Geração de Vizinhos:** O algoritmo explora o espaço de soluções gerando "vizinhos", que são pequenas modificações aleatórias na grade atual (ex: trocar o horário de duas aulas).
-3.  **Critério de Aceitação:** Movimentos que levam a uma solução de menor custo (melhor qualidade) são sempre aceitos. Movimentos que pioram a solução podem ser aceitos com uma certa probabilidade, que diminui à medida que a "temperatura" do sistema baixa. Isso permite que o algoritmo escape de ótimos locais.
-
-Ao final, o processo gera o arquivo `grade_melhorada.json`, contendo a versão final e otimizada da grade horária.
+#### Fase 2: Simulated Annealing
+- **Função de Custo Multiobjetivo:**
+  - Minimização de janelas de horário
+  - Distribuição equilibrada de aulas
+  - Agrupamento de aulas consecutivas
+  - Preferências de horários
+- **Movimentos Adaptativos:** 7 tipos diferentes de perturbação
+- **Memória Tabu:** Evita ciclos na busca
+- **Reaquecimento Automático:** Escape de ótimos locais
 
 ## 📂 Estrutura do Projeto
 
 ```
-/
-├── backend/
-│   ├── Main.cpp                 # Ponto de entrada, configuração dos dados
-│   ├── GeradorHorario.h         # Definição da classe de geração
-│   ├── GeradorHorario.cpp       # Implementação da geração
-│   ├── SimulatedAnnealing.h     # Definição da classe de otimização
-│   └── SimulatedAnnealing.cpp   # Implementação da otimização
-│
-├── frontend/
-│   ├── Visualizador.html        # Estrutura da página do visualizador
-│   ├── style_visualizador.css   # Estilos da página
-│   └── script_visualizador.js   # Lógica do visualizador (carregamento e renderização)
-│
-└── output/
-    ├── grade_horaria.json       # Grade gerada pela Fase 1
-    └── grade_melhorada.json     # Grade otimizada pela Fase 2
+projeto/
+├── index.html                          # Página inicial do sistema
+├── src/
+│   └── geradorArquivos/
+│       ├── Estruturas.h                # Definições de estruturas de dados
+│       ├── GeradorHorario.h/.cpp       # Algoritmo de geração inicial
+│       ├── SimulatedAnnealing.h/.cpp   # Algoritmo de otimização
+│       ├── GeradorWeb.cpp              # Interface WebAssembly
+│       ├── Main.cpp                    # Versão desktop
+│       └── json.hpp                    # Biblioteca JSON
+├── web/
+│   ├── sistemaCadastro/
+│   │   ├── sistemaCadastro.html       # Interface de cadastro
+│   │   ├── sistemaIntegrado.html      # Sistema completo integrado
+│   │   ├── style_cadastro.css         # Estilos do cadastro
+│   │   ├── script_cadastro.js         # Lógica do cadastro
+│   │   └── gerador.js                 # Código WASM compilado
+│   └── visualizador/
+│       └── Visualizador.html           # Visualizador de grades
+└── build_web.sh                        # Script de compilação
 ```
 
-## ▶️ Como Executar
+## 🚀 Como Usar
 
-### Pré-requisitos
+### Opção 1: Versão Web (Recomendada)
 
-  * Um compilador C++ moderno (g++, Clang, MSVC).
-  * Um navegador de internet para usar o visualizador.
+1. **Instalar Dependências:**
+   ```bash
+   # Instalar Emscripten (compilador WebAssembly)
+   git clone https://github.com/emscripten-core/emsdk.git
+   cd emsdk
+   ./emsdk install latest
+   ./emsdk activate latest
+   source ./emsdk_env.sh
+   ```
 
-### 1\. Compilar e Executar o Backend (Gerador)
+2. **Compilar para WebAssembly:**
+   ```bash
+   chmod +x build_web.sh
+   ./build_web.sh
+   ```
 
-1.  **Navegue até o diretório `backend/`**.
-2.  **Compile os arquivos C++**. Exemplo usando g++:
-    ```bash
-    g++ Main.cpp GeradorHorario.cpp SimulatedAnnealing.cpp -o gerador_horario -std=c++17
-    ```
-3.  **Execute o programa compilado**:
-    ```bash
-    ./gerador_horario
-    ```
-4.  O programa irá executar a **Fase 1** e salvar o resultado em `grade_horaria.json`. Em seguida, ele perguntará se você deseja executar a **Fase 2 (otimização)**. Digite `S` e pressione Enter para continuar.
-5.  Ao final da **Fase 2**, o arquivo `grade_melhorada.json` será gerado.
+3. **Iniciar Servidor Local:**
+   ```bash
+   python -m http.server 8000
+   # Ou com Node.js: npx http-server
+   ```
 
-### 2\. Usar o Frontend (Visualizador)
+4. **Acessar no Navegador:**
+   ```
+   http://localhost:8000/
+   ```
 
-1.  **Abra o arquivo `frontend/Visualizador.html`** em seu navegador de preferência.
-2.  Clique no botão **"📁 Carregar Grade (JSON)"**.
-3.  Selecione um dos arquivos gerados (`grade_horaria.json` ou `grade_melhorada.json`).
-4.  A grade será exibida na tela. Use os controles de "Visualizar" e "Filtrar" para explorar os horários por turma, professor ou sala.
+### Opção 2: Versão Desktop
 
-## 🔧 Configuração dos Dados
+1. **Compilar:**
+   ```bash
+   g++ -o gerador src/geradorArquivos/Main.cpp \
+        src/geradorArquivos/GeradorHorario.cpp \
+        src/geradorArquivos/SimulatedAnnealing.cpp \
+        -std=c++17 -O3
+   ```
 
-Atualmente, todos os dados da instituição de ensino (professores, disciplinas, turmas, disponibilidade, etc.) estão definidos diretamente no código, dentro da função `setupDadosExemplo()` no arquivo `Main.cpp`. Para adaptar o projeto para outra realidade, é necessário alterar os dados nesta função.
+2. **Executar:**
+   ```bash
+   ./gerador [arquivo_dados.json]
+   ```
+
+## 📋 Workflow Completo
+
+### 1. Cadastro de Dados
+- Acesse o Sistema de Cadastro
+- Configure todas as informações:
+  - **Turmas:** Nome e turno
+  - **Disciplinas:** Nome e carga horária por turma
+  - **Professores:** Nome, disciplina e disponibilidade
+  - **Salas:** Nome, tipo e se é compartilhada
+- Exporte os dados em JSON
+
+### 2. Geração da Grade
+- Acesse o Sistema Integrado
+- Carregue o arquivo JSON exportado
+- Clique em "Processar" para gerar a grade
+- Aguarde o processamento (executa no navegador)
+
+### 3. Visualização e Análise
+- Visualize a grade gerada
+- Analise as estatísticas de qualidade
+- Exporte o resultado final
+
+## 🔧 Configuração e Personalização
+
+### Parâmetros do Simulated Annealing
+
+No arquivo `SimulatedAnnealing.h`, ajuste os parâmetros em `ConfiguracaoSA`:
+
+```cpp
+struct ConfiguracaoSA {
+    int numIteracoes = 10000;          // Número de iterações
+    double temperaturaInicial = 100.0;  // Temperatura inicial
+    double taxaResfriamento = 0.95;     // Taxa de resfriamento
+    
+    // Pesos das penalidades
+    double pesoDistribuicao = 2.0;      // Distribuição de aulas
+    double pesoConsecutivas = 3.0;      // Aulas consecutivas
+    double pesoJanelas = 4.0;           // Janelas de horário
+    double pesoHorariosExtremos = 1.0;  // Horários extremos
+};
+```
+
+### Restrições e Preferências
+
+Modifique as validações em `GeradorHorario.cpp` para adicionar novas restrições específicas da sua instituição.
 
 ## 🛠️ Tecnologias Utilizadas
 
-  * **Backend:** C++ (STL)
-  * **Frontend:** HTML5, CSS3, JavaScript (vanilla)
-  * **Formato de Dados:** JSON
+- **Backend:** C++17 (STL, algoritmos modernos)
+- **Compilação Web:** Emscripten/WebAssembly
+- **Frontend:** HTML5, CSS3, JavaScript ES6+
+- **Serialização:** JSON (nlohmann/json)
+- **Algoritmos:** Backtracking, Simulated Annealing, Heurísticas
+
+## 📊 Métricas de Qualidade
+
+O sistema avalia a qualidade da grade através de:
+
+- **Taxa de Alocação:** Percentual de aulas alocadas com sucesso
+- **Janelas de Horário:** Total de espaços vazios entre aulas
+- **Distribuição Semanal:** Equilíbrio de aulas por dia
+- **Aulas Consecutivas:** Agrupamento de aulas da mesma disciplina
+- **Ocupação de Salas:** Eficiência no uso dos espaços
+
+## 🔍 Solução de Problemas
+
+### Erro: "emcc não encontrado"
+```bash
+source ~/emsdk/emsdk_env.sh  # Linux/Mac
+# ou
+C:\emsdk\emsdk_env.bat       # Windows
+```
+
+### Navegador não suporta WebAssembly
+Use um navegador moderno: Chrome 57+, Firefox 52+, Safari 11+, Edge 16+
+
+### Grade não converge
+- Verifique se há professores suficientes
+- Confirme disponibilidade adequada
+- Reduza restrições muito restritivas
+
+## 📚 Referências
+
+- Poulsen, C. J. B. (2012). [Desenvolvimento de um modelo para o School Timetabling Problem baseado na Meta-Heurística Simulated Annealing](http://hdl.handle.net/10183/39522)
+- [Emscripten Documentation](https://emscripten.org/docs/)
+- [WebAssembly MDN](https://developer.mozilla.org/en-US/docs/WebAssembly)
+
+## 📄 Licença
+
+Este projeto é distribuído sob a licença MIT. Veja o arquivo LICENSE para mais detalhes.
+
+## 🤝 Contribuições
+
+Contribuições são bem-vindas! Por favor:
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/NovaFuncionalidade`)
+3. Commit suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
+4. Push para a branch (`git push origin feature/NovaFuncionalidade`)
+5. Abra um Pull Request
+
+---
+
+Desenvolvido com ❤️ para facilitar a vida de gestores escolares e coordenadores pedagógicos.
