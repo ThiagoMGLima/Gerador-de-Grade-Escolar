@@ -136,7 +136,7 @@ std::string processarGradeHoraria(std::string dadosJSON, bool aplicarOtimizacao 
         bool sucessoFase1 = false;
         std::vector<Aula> gradeInicial;
 
-        for (int tentativa = 1; tentativa <= 100; tentativa++) {
+        for (int tentativa = 1; tentativa <= 10000; tentativa++) {
             if (tentativa % 10 == 0) {
                 std::stringstream msg;
                 msg << "Fase 1: Tentativa " << tentativa << " de 100...";
@@ -178,7 +178,7 @@ std::string processarGradeHoraria(std::string dadosJSON, bool aplicarOtimizacao 
 
         if (!sucessoFase1) {
             json erro;
-            erro["erro"] = "Não foi possível gerar uma grade inicial válida após 100 tentativas";
+            erro["erro"] = "Não foi possível gerar uma grade inicial válida após 10000 tentativas";
             return erro.dump();
         }
 
@@ -192,7 +192,7 @@ std::string processarGradeHoraria(std::string dadosJSON, bool aplicarOtimizacao 
             reportProgress("Iniciando Fase 2: Otimização com Simulated Annealing...", 55);
 
             ConfiguracaoSA configSA;
-            configSA.numIteracoes = 5000; // Menos iterações para WebAssembly
+            configSA.numIteracoes = 50000; // Menos iterações para WebAssembly
             configSA.temperaturaInicial = 100.0;
             configSA.taxaResfriamento = 0.95;
             configSA.verboso = false;
@@ -219,7 +219,7 @@ std::string processarGradeHoraria(std::string dadosJSON, bool aplicarOtimizacao 
                     reportProgress(msg.str().c_str(), progresso);
                 }
             });
-            
+
             gradeFinal = sa.getSolucaoFinal();
 
             // Coletar estatísticas

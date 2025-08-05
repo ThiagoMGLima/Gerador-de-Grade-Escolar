@@ -32,14 +32,13 @@ emcc -O2 \
 
 if [ $? -eq 0 ]; then
     echo "✓ Compilação concluída com sucesso!"
-    echo "Arquivo gerado: web/sistemaCadastro/gerador.js"
+    echo "Arquivo gerado: web/gerador.js"
 
-    # Copiar também para o diretório do visualizador se necessário
-    cp web/sistemaCadastro/gerador.js web/visualizador/ 2>/dev/null || true
-
-
-    echo "acesse: http://localhost:8000/index.html"
-    python3 -m http.server 8000
+    echo ""
+    echo "Para testar o sistema integrado:"
+    echo "1. Abra um terminal na pasta raiz do projeto"
+    echo "2. Execute: python3 -m http.server 8000"
+    echo "3. Acesse: http://localhost:8000/web/sistemaIntegrado.html"
 
 else
     echo "✗ Erro na compilação"

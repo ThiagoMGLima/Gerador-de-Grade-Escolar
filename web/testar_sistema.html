@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Teste do Sistema</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste do Sistema de Grade</h1>
+
+    <div id="status"></div>
+
+    <button onclick="testarModulo()">Testar Módulo WebAssembly</button>
+    <button onclick="testarGeracao()">Testar Geração Simples</button>
+
+    <script src="gerador.js"></script>
+    <script>
+        let geradorModule = null;
+
+        window.onload = async function() {
+            const status = document.getElementById('status');
+
+            try {
+                console.log('Iniciando carregamento do módulo...');
+                status.innerHTML = '<div class="status info">Carregando módulo...</div>';
+
+                if (typeof GeradorModule === 'undefined') {
+                    throw new Error('GeradorModule não encontrado. Verifique se gerador.js existe.');
+                }
+
+                geradorModule = await GeradorModule();
+                console.log('Módulo carregado:', geradorModule);
+
+                status.innerHTML = '<div class="status success">✓ Módulo carregado com sucesso!</div>';
+
+                // Listar funções disponíveis
+                console.log('Funções disponíveis:');
+                console.log('- processarGradeHoraria:', typeof geradorModule.processarGradeHoraria);
+                console.log('- processarGradeRapida:', typeof geradorModule.processarGradeRapida);
+
+            } catch (error) {
+                console.error('Erro:', error);
+                status.innerHTML = `<div class="status error">❌ Erro: ${error.message}</div>`;
+            }
+        };
+
+        function testarModulo() {
+            if (!geradorModule) {
+                alert('Módulo não carregado!');
+                return;
+            }
+
+            alert('Módulo OK!\n\nFunções disponíveis:\n' +
+                  '- processarGradeHoraria\n' +
+                  '- processarGradeRapida');
+        }
+
+        function testarGeracao() {
+            if (!geradorModule) {
+                alert('Módulo não carregado!');
+                return;
+            }
+
+            // Dados mínimos de teste
+            const dadosTeste = {
+                turmas: [{id: 1, nome: "Turma A", turno: "manha"}],
+                disciplinas: [{id: 101, nome: "Matemática", aulasPorTurma: {1: 2}}],
+                professores: [{
+                    id: 201,
+                    nome: "Prof. João",
+                    idDisciplina: 101,
+                    disponibilidade: [
+                        {dia: 0, horario: 0},
+                        {dia: 0, horario: 1}
+                    ]
+                }],
+                salas: [{id: 501, nome: "Sala 1", tipo: "normal", compartilhada: false}],
+                associacoes: {turmaSala: {1: 501}}
+            };
+
+            try {
+                const resultado = geradorModule.processarGradeRapida(JSON.stringify(dadosTeste));
+                const res = JSON.parse(resultado);
+
+                if (res.erro) {
+                    alert('Erro na geração: ' + res.erro);
+                } else {
+                    alert('Sucesso! Grade gerada com ' + res.aulas.length + ' aulas');
+                    console.log('Resultado:', res);
+                }
+            } catch (error) {
+                alert('Erro: ' + error.message);
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

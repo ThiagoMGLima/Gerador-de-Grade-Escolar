@@ -311,7 +311,7 @@
                                 if (confirm('Deseja abrir este arquivo no Visualizador de Grade?')) {
                                     // Salvar no localStorage e abrir visualizador
                                     localStorage.setItem('gradeHoraria', JSON.stringify(dados));
-                                    window.open('visualizador/Visualizador.html', '_blank');
+                                    window.open('visualizador/VisualizadorGrade.html', '_blank');
                                 }
                             }, 500);
                         }
@@ -603,7 +603,7 @@
             localStorage.setItem('gradeHoraria', JSON.stringify(gradeGerada));
 
             console.log('Abrindo visualizador...');
-            window.open('visualizador/Visualizador.html', '_blank');
+            window.open('visualizador/VisualizadorGrade.html', '_blank');
 
             mostrarStatus('Visualizador aberto em nova aba', 'info');
         }
