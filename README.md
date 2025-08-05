@@ -158,7 +158,11 @@ struct ConfiguracaoSA {
     int numIteracoes = 10000;          // Número de iterações
     double temperaturaInicial = 100.0;  // Temperatura inicial
     double taxaResfriamento = 0.95;     // Taxa de resfriamento
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 34df94d427da66d14326e4e64d5ea160cda9733c
     // Pesos das penalidades
     double pesoDistribuicao = 2.0;      // Distribuição de aulas
     double pesoConsecutivas = 3.0;      // Aulas consecutivas
