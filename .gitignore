@@ -1,4 +1,5 @@
 *.exe
 *.json
 *.zip
+gerador.js
 gerador_horario

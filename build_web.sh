@@ -35,10 +35,9 @@ if [ $? -eq 0 ]; then
     echo "Arquivo gerado: web/gerador.js"
 
     echo ""
-    echo "Para testar o sistema integrado:"
-    echo "1. Abra um terminal na pasta raiz do projeto"
-    echo "2. Execute: python3 -m http.server 8000"
-    echo "3. Acesse: http://localhost:8000/web/sistemaIntegrado.html"
+    echo "testar o sistema"
+    python3 -m http.server 8000
+    xdg-open "http://localhost:8000/index.html" >/dev/null 2>&1 &
 
 else
     echo "✗ Erro na compilação"
