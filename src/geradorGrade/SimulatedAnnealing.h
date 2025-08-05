@@ -155,6 +155,10 @@ public:
     void ajustarPesos(double dist, double consec, double jan, double ext);
     void setConfiguracao(const ConfiguracaoSA& novaConfig) { config = novaConfig; }
 
+    void setProgressCallback(std::function<void(int, int, double)> callback) {
+        progressCallback = callback;
+    }
+
 private:
     // Dados do problema
     std::vector<Aula> solucaoAtual;
@@ -165,6 +169,7 @@ private:
     std::vector<Sala> salas;
     std::set<std::tuple<int, int, int>> disponibilidadeProfessores;
     std::map<int, int> turmaSalaMap;
+    std::function<void(int, int, double)> progressCallback;
 
     // Configuração e estado
     ConfiguracaoSA config;
@@ -233,7 +238,7 @@ private:
     void limparCaches();
     void registrarEstatistica(int iteracao);
     void log(const std::string& mensagem) const;
-    
+
     std::string formatarTempo(double segundos) const;
 
     // Busca local (melhoria adicional)

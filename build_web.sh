@@ -37,11 +37,10 @@ if [ $? -eq 0 ]; then
     # Copiar também para o diretório do visualizador se necessário
     cp web/sistemaCadastro/gerador.js web/visualizador/ 2>/dev/null || true
 
-    echo ""
-    echo "Para testar, execute:"
-    echo "  cd web/sistemaCadastro"
-    echo "  python -m http.server 8000"
-    echo "  Depois acesse: http://localhost:8000/sistemaIntegrado.html"
+
+    echo "acesse: http://localhost:8000/index.html"
+    python3 -m http.server 8000
+
 else
     echo "✗ Erro na compilação"
     exit 1

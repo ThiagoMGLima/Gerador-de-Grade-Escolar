@@ -502,11 +502,6 @@
                 return;
             }
 
-            console.log('Iniciando geração de grade...');
-            mostrarStatus('Processando... Isso pode levar alguns segundos.', 'loading');
-            document.getElementById('progressBar').style.display = 'block';
-            document.getElementById('btnGerar').disabled = true;
-
             // Simular progresso
             let progress = 0;
             const progressInterval = setInterval(() => {
@@ -515,14 +510,36 @@
                 document.querySelector('#progressBar .progress').style.width = progress + '%';
             }, 200);
 
-            try {
+                try {
+                    // Perguntar se quer otimização
+                const aplicarOtimizacao = confirm(
+                    'Deseja aplicar otimização avançada?\n\n' +
+                    'SIM: Grade otimizada (mais demorado, melhor qualidade)\n' +
+                    'NÃO: Grade básica (mais rápido)'
+                );
+
+                console.log('Aplicar otimização:', aplicarOtimizacao);
+
+                // Configurar callback de progresso
+                geradorModule.onProgress = function(mensagem, percentual) {
+                    mostrarStatus(mensagem, 'loading');
+                    document.querySelector('#progressBar .progress').style.width = percentual + '%';
+                };
+
+                const json = JSON.stringify(dadosCarregados);
+                const resultadoStr = aplicarOtimizacao
+                    ? geradorModule.processarGradeHoraria(json, true)
+                    : geradorModule.processarGradeRapida(json);
+
+                const resultado = JSON.parse(resultadoStr);
+
+                console.log('Iniciando geração de grade...');
+                mostrarStatus('Processando... Isso pode levar alguns segundos.', 'loading');
+                document.getElementById('progressBar').style.display = 'block';
+                document.getElementById('btnGerar').disabled = true;
+
                 // Dar tempo para UI atualizar
                 await new Promise(resolve => setTimeout(resolve, 100));
-
-                console.log('Chamando função WebAssembly...');
-                const json = JSON.stringify(dadosCarregados);
-                const resultadoStr = geradorModule.processarGradeHoraria(json);
-                const resultado = JSON.parse(resultadoStr);
 
                 console.log('Resultado recebido:', resultado);
 
@@ -542,14 +559,16 @@
                     document.getElementById('btnBaixar').disabled = false;
 
                     // Mostrar estatísticas
-                    if (resultado.aulas) {
+                    if (resultado.metadata && resultado.metadata.otimizacao) {
                         preview.innerHTML += `
-                            <div class="file-info" style="margin-top: 20px;">
-                                <h3>✅ Grade Gerada com Sucesso!</h3>
-                                <strong>Total de aulas alocadas:</strong> ${resultado.aulas.length}<br>
-                                <small>Clique em "Abrir Visualizador" para ver a grade completa</small>
-                            </div>
-                        `;
+                        <div class="file-info" style="margin-top: 20px;">
+                        <h3>📊 Estatísticas de Otimização:</h3>
+                        <strong>Custo inicial:</strong> ${resultado.metadata.otimizacao.custoInicial.toFixed(2)}<br>
+                        <strong>Custo final:</strong> ${resultado.metadata.otimizacao.custoFinal.toFixed(2)}<br>
+                        <strong>Melhoria:</strong> ${resultado.metadata.otimizacao.melhoria.toFixed(1)}%<br>
+                        <strong>Movimentos aceitos:</strong> ${resultado.metadata.otimizacao.movimentosAceitos}
+                        </div>
+                    `;
                     }
                 }
 
