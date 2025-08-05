@@ -28,7 +28,7 @@ emcc -O2 \
     -s SINGLE_FILE=1 \
     --bind \
     -std=c++17 \
-    -o web/sistemaIntegrado/gerador.js
+    -o web/gerador.js
 
 if [ $? -eq 0 ]; then
     echo "✓ Compilação concluída com sucesso!"

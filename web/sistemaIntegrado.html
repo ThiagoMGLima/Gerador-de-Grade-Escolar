@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Integrado de Grade Horária</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .status.loading {
+            background: #fff3cd;
+            color: #856404;
+            display: block;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            display: block;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            display: block;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #0056b3;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: #218838;
+        }
+
+        #progressBar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            display: none;
+            margin: 20px 0;
+        }
+
+        #progressBar .progress {
+            height: 100%;
+            background: #007bff;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .step {
+            margin: 20px 0;
+            padding: 20px;
+            border-left: 4px solid #007bff;
+            background: #f8f9fa;
+        }
+
+        .step.disabled {
+            opacity: 0.5;
+            border-left-color: #ccc;
+        }
+
+        .step h3 {
+            margin-top: 0;
+        }
+
+        .error-details {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 0.9em;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .file-info {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+
+        .validation-item {
+            padding: 5px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .validation-item.valid::before {
+            content: "✓";
+            color: #28a745;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .validation-item.invalid::before {
+            content: "✗";
+            color: #dc3545;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 Sistema Integrado de Grade Horária</h1>
+
+        <div class="workflow">
+            <h2>Fluxo de Trabalho:</h2>
+
+            <!-- Passo 1: Carregar dados -->
+            <div class="step" id="step1">
+                <h3>1. Carregar Dados Cadastrados</h3>
+                <input type="file" id="fileInput" accept=".json" style="display: none;">
+                <button class="btn-primary" onclick="document.getElementById('fileInput').click()">
+                    📂 Selecionar Arquivo JSON
+                </button>
+                <div id="fileInfo" class="file-info" style="display: none;"></div>
+                <div id="validationResults" style="margin-top: 10px;"></div>
+            </div>
+
+            <!-- Passo 2: Processar -->
+            <div class="step disabled" id="step2">
+                <h3>2. Gerar Grade Horária</h3>
+                <button class="btn-success" onclick="gerarGrade()" disabled id="btnGerar">
+                    ⚙️ Processar com C++
+                </button>
+                <div id="progressBar">
+                    <div class="progress"></div>
+                </div>
+            </div>
+
+            <!-- Passo 3: Visualizar -->
+            <div class="step disabled" id="step3">
+                <h3>3. Visualizar Resultado</h3>
+                <button class="btn-primary" onclick="visualizarGrade()" disabled id="btnVisualizar">
+                    👁️ Abrir Visualizador
+                </button>
+                <button class="btn-primary" onclick="baixarGrade()" disabled id="btnBaixar">
+                    💾 Baixar Grade
+                </button>
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div id="status" class="status"></div>
+
+        <!-- Preview dos dados -->
+        <div id="preview" style="margin-top: 20px;"></div>
+    </div>
+
+    <!-- Carregar módulo WebAssembly -->
+    <script src="gerador.js"></script>
+
+    <script>
+        let dadosCarregados = null;
+        let gradeGerada = null;
+        let geradorModule = null;
+
+        // Configurar listener do input de arquivo
+        document.getElementById('fileInput').addEventListener('change', carregarDados);
+
+        // Inicializar WebAssembly
+        window.onload = async function() {
+            console.log('Iniciando carregamento do módulo WebAssembly...');
+            mostrarStatus('Carregando módulo C++...', 'loading');
+
+            try {
+                // Verificar se o arquivo gerador.js existe
+                if (typeof GeradorModule === 'undefined') {
+                    throw new Error('Módulo WebAssembly não encontrado. Certifique-se de que o arquivo foi compilado.');
+                }
+
+                geradorModule = await GeradorModule();
+                console.log('Módulo WebAssembly carregado com sucesso!');
+                mostrarStatus('Sistema pronto! Selecione um arquivo JSON para começar.', 'info');
+            } catch (error) {
+                console.error('Erro ao carregar módulo:', error);
+                mostrarStatus('Erro ao carregar módulo C++: ' + error.message, 'error');
+
+                // Desabilitar funcionalidades que dependem do módulo
+                document.getElementById('btnGerar').disabled = true;
+                document.getElementById('btnGerar').textContent = '⚠️ Módulo não disponível';
+            }
+        };
+
+        function mostrarStatus(mensagem, tipo) {
+            const status = document.getElementById('status');
+            status.textContent = mensagem;
+            status.className = 'status ' + tipo;
+            status.style.display = 'block';
+
+            console.log(`[${tipo.toUpperCase()}] ${mensagem}`);
+        }
+
+        function carregarDados(event) {
+            console.log('Iniciando carregamento de arquivo...');
+            const file = event.target.files[0];
+
+            if (!file) {
+                console.log('Nenhum arquivo selecionado');
+                return;
+            }
+
+            console.log('Arquivo selecionado:', file.name, 'Tamanho:', file.size, 'bytes');
+
+            // Mostrar informações do arquivo
+            const fileInfo = document.getElementById('fileInfo');
+            fileInfo.style.display = 'block';
+            fileInfo.innerHTML = `
+                <strong>Arquivo:</strong> ${file.name}<br>
+                <strong>Tamanho:</strong> ${(file.size / 1024).toFixed(2)} KB<br>
+                <strong>Tipo:</strong> ${file.type || 'application/json'}
+            `;
+
+            const reader = new FileReader();
+
+            reader.onerror = function(error) {
+                console.error('Erro ao ler arquivo:', error);
+                mostrarStatus('Erro ao ler o arquivo', 'error');
+            };
+
+            reader.onload = function(e) {
+                console.log('Arquivo lido com sucesso, processando...');
+
+                try {
+                    // Tentar fazer parse do JSON
+                    const dados = JSON.parse(e.target.result);
+                    console.log('JSON parseado com sucesso:', dados);
+
+                    // Validar estrutura dos dados
+                    const validacao = validarDadosCadastro(dados);
+
+                    if (validacao.valido) {
+                        dadosCarregados = dados;
+                        mostrarStatus('Dados carregados e validados com sucesso!', 'success');
+
+                        // Habilitar próximo passo
+                        document.getElementById('step2').classList.remove('disabled');
+                        document.getElementById('btnGerar').disabled = false;
+
+                        // Mostrar preview
+                        mostrarPreview();
+                        mostrarResultadosValidacao(validacao);
+
+                    } else {
+                        mostrarStatus('Arquivo inválido: ' + validacao.mensagem, 'error');
+                        mostrarResultadosValidacao(validacao);
+
+                        // Se for uma grade já gerada, sugerir visualizador
+                        if (dados.aulas && dados.metadata) {
+                            mostrarStatus('Este parece ser um arquivo de grade já gerada. Use o Visualizador para abri-lo.', 'info');
+
+                            setTimeout(() => {
+                                if (confirm('Deseja abrir este arquivo no Visualizador de Grade?')) {
+                                    // Salvar no localStorage e abrir visualizador
+                                    localStorage.setItem('gradeHoraria', JSON.stringify(dados));
+                                    window.open('visualizador/Visualizador.html', '_blank');
+                                }
+                            }, 500);
+                        }
+                    }
+
+                } catch (error) {
+                    console.error('Erro ao processar JSON:', error);
+                    mostrarStatus('Erro ao processar arquivo: ' + error.message, 'error');
+
+                    // Mostrar detalhes do erro
+                    const preview = document.getElementById('preview');
+                    preview.innerHTML = `
+                        <h3>❌ Detalhes do Erro:</h3>
+                        <div class="error-details">
+                            ${error.stack || error.message}
+                        </div>
+                        <p><strong>Dica:</strong> Certifique-se de que o arquivo é um JSON válido exportado do Sistema de Cadastro.</p>
+                    `;
+                }
+            };
+
+            // Iniciar leitura do arquivo
+            reader.readAsText(file);
+        }
+
+        function validarDadosCadastro(dados) {
+            const resultado = {
+                valido: true,
+                mensagem: '',
+                detalhes: {
+                    turmas: { presente: false, valido: false, quantidade: 0 },
+                    disciplinas: { presente: false, valido: false, quantidade: 0 },
+                    professores: { presente: false, valido: false, quantidade: 0 },
+                    salas: { presente: false, valido: false, quantidade: 0 },
+                    associacoes: { presente: false, valido: false }
+                }
+            };
+
+            // Verificar se é um arquivo de dados cadastrados
+            if (!dados || typeof dados !== 'object') {
+                resultado.valido = false;
+                resultado.mensagem = 'Arquivo não contém um objeto JSON válido';
+                return resultado;
+            }
+
+            // Verificar turmas
+            if (dados.turmas) {
+                resultado.detalhes.turmas.presente = true;
+                if (Array.isArray(dados.turmas) && dados.turmas.length > 0) {
+                    resultado.detalhes.turmas.valido = true;
+                    resultado.detalhes.turmas.quantidade = dados.turmas.length;
+                }
+            }
+
+            // Verificar disciplinas
+            if (dados.disciplinas) {
+                resultado.detalhes.disciplinas.presente = true;
+                if (Array.isArray(dados.disciplinas) && dados.disciplinas.length > 0) {
+                    resultado.detalhes.disciplinas.valido = true;
+                    resultado.detalhes.disciplinas.quantidade = dados.disciplinas.length;
+                }
+            }
+
+            // Verificar professores
+            if (dados.professores) {
+                resultado.detalhes.professores.presente = true;
+                if (Array.isArray(dados.professores) && dados.professores.length > 0) {
+                    resultado.detalhes.professores.valido = true;
+                    resultado.detalhes.professores.quantidade = dados.professores.length;
+                }
+            }
+
+            // Verificar salas
+            if (dados.salas) {
+                resultado.detalhes.salas.presente = true;
+                if (Array.isArray(dados.salas) && dados.salas.length > 0) {
+                    resultado.detalhes.salas.valido = true;
+                    resultado.detalhes.salas.quantidade = dados.salas.length;
+                }
+            }
+
+            // Verificar associações
+            if (dados.associacoes && dados.associacoes.turmaSala) {
+                resultado.detalhes.associacoes.presente = true;
+                resultado.detalhes.associacoes.valido = true;
+            }
+
+            // Determinar se é válido
+            const todosPresentes = resultado.detalhes.turmas.presente &&
+                                 resultado.detalhes.disciplinas.presente &&
+                                 resultado.detalhes.professores.presente &&
+                                 resultado.detalhes.salas.presente;
+
+            const todosValidos = resultado.detalhes.turmas.valido &&
+                               resultado.detalhes.disciplinas.valido &&
+                               resultado.detalhes.professores.valido &&
+                               resultado.detalhes.salas.valido;
+
+            if (!todosPresentes) {
+                resultado.valido = false;
+                resultado.mensagem = 'Arquivo não contém todos os dados necessários';
+            } else if (!todosValidos) {
+                resultado.valido = false;
+                resultado.mensagem = 'Alguns dados estão vazios ou inválidos';
+            } else {
+                resultado.mensagem = 'Dados válidos e prontos para processamento';
+            }
+
+            return resultado;
+        }
+
+        function mostrarResultadosValidacao(validacao) {
+            const container = document.getElementById('validationResults');
+            let html = '<h4>Validação dos Dados:</h4>';
+
+            // Turmas
+            html += `<div class="validation-item ${validacao.detalhes.turmas.valido ? 'valid' : 'invalid'}">
+                Turmas: ${validacao.detalhes.turmas.quantidade} encontradas
+            </div>`;
+
+            // Disciplinas
+            html += `<div class="validation-item ${validacao.detalhes.disciplinas.valido ? 'valid' : 'invalid'}">
+                Disciplinas: ${validacao.detalhes.disciplinas.quantidade} encontradas
+            </div>`;
+
+            // Professores
+            html += `<div class="validation-item ${validacao.detalhes.professores.valido ? 'valid' : 'invalid'}">
+                Professores: ${validacao.detalhes.professores.quantidade} encontrados
+            </div>`;
+
+            // Salas
+            html += `<div class="validation-item ${validacao.detalhes.salas.valido ? 'valid' : 'invalid'}">
+                Salas: ${validacao.detalhes.salas.quantidade} encontradas
+            </div>`;
+
+            // Associações
+            html += `<div class="validation-item ${validacao.detalhes.associacoes.valido ? 'valid' : 'invalid'}">
+                Associações turma-sala: ${validacao.detalhes.associacoes.valido ? 'OK' : 'Faltando'}
+            </div>`;
+
+            container.innerHTML = html;
+        }
+
+        function mostrarPreview() {
+            if (!dadosCarregados) return;
+
+            const preview = document.getElementById('preview');
+
+            // Calcular estatísticas adicionais
+            let totalAulas = 0;
+            dadosCarregados.disciplinas.forEach(disc => {
+                Object.values(disc.aulasPorTurma || {}).forEach(qtd => {
+                    totalAulas += qtd;
+                });
+            });
+
+            preview.innerHTML = `
+                <h3>📊 Resumo dos Dados Carregados:</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div class="file-info">
+                        <strong>Turmas:</strong> ${dadosCarregados.turmas.length}<br>
+                        <small>${dadosCarregados.turmas.map(t => t.nome).join(', ')}</small>
+                    </div>
+                    <div class="file-info">
+                        <strong>Disciplinas:</strong> ${dadosCarregados.disciplinas.length}<br>
+                        <small>Total de ${totalAulas} aulas semanais</small>
+                    </div>
+                    <div class="file-info">
+                        <strong>Professores:</strong> ${dadosCarregados.professores.length}<br>
+                        <small>${dadosCarregados.professores.map(p => p.nome).slice(0, 3).join(', ')}${dadosCarregados.professores.length > 3 ? '...' : ''}</small>
+                    </div>
+                    <div class="file-info">
+                        <strong>Salas:</strong> ${dadosCarregados.salas.length}<br>
+                        <small>${dadosCarregados.salas.filter(s => s.compartilhada).length} compartilhadas</small>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function gerarGrade() {
+            if (!dadosCarregados) {
+                mostrarStatus('Nenhum dado carregado', 'error');
+                return;
+            }
+
+            if (!geradorModule) {
+                mostrarStatus('Módulo C++ não está disponível. Recarregue a página.', 'error');
+                return;
+            }
+
+            console.log('Iniciando geração de grade...');
+            mostrarStatus('Processando... Isso pode levar alguns segundos.', 'loading');
+            document.getElementById('progressBar').style.display = 'block';
+            document.getElementById('btnGerar').disabled = true;
+
+            // Simular progresso
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 90) progress = 90;
+                document.querySelector('#progressBar .progress').style.width = progress + '%';
+            }, 200);
+
+            try {
+                // Dar tempo para UI atualizar
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                console.log('Chamando função WebAssembly...');
+                const json = JSON.stringify(dadosCarregados);
+                const resultadoStr = geradorModule.processarGradeHoraria(json);
+                const resultado = JSON.parse(resultadoStr);
+
+                console.log('Resultado recebido:', resultado);
+
+                clearInterval(progressInterval);
+                document.querySelector('#progressBar .progress').style.width = '100%';
+
+                if (resultado.erro) {
+                    mostrarStatus('Erro: ' + resultado.erro, 'error');
+                    console.error('Erro no processamento:', resultado.erro);
+                } else {
+                    gradeGerada = resultado;
+                    mostrarStatus('Grade gerada com sucesso!', 'success');
+
+                    // Habilitar visualização
+                    document.getElementById('step3').classList.remove('disabled');
+                    document.getElementById('btnVisualizar').disabled = false;
+                    document.getElementById('btnBaixar').disabled = false;
+
+                    // Mostrar estatísticas
+                    if (resultado.aulas) {
+                        preview.innerHTML += `
+                            <div class="file-info" style="margin-top: 20px;">
+                                <h3>✅ Grade Gerada com Sucesso!</h3>
+                                <strong>Total de aulas alocadas:</strong> ${resultado.aulas.length}<br>
+                                <small>Clique em "Abrir Visualizador" para ver a grade completa</small>
+                            </div>
+                        `;
+                    }
+                }
+
+            } catch (error) {
+                clearInterval(progressInterval);
+                console.error('Erro ao processar:', error);
+                mostrarStatus('Erro ao processar: ' + error.message, 'error');
+
+                // Mostrar detalhes do erro
+                const preview = document.getElementById('preview');
+                preview.innerHTML += `
+                    <div class="error-details" style="margin-top: 20px;">
+                        <strong>Detalhes do erro:</strong><br>
+                        ${error.stack || error.message}
+                    </div>
+                `;
+            } finally {
+                document.getElementById('btnGerar').disabled = false;
+                setTimeout(() => {
+                    document.getElementById('progressBar').style.display = 'none';
+                }, 1000);
+            }
+        }
+
+        function visualizarGrade() {
+            if (!gradeGerada) {
+                mostrarStatus('Nenhuma grade foi gerada ainda', 'error');
+                return;
+            }
+
+            console.log('Salvando grade no localStorage...');
+            localStorage.setItem('gradeHoraria', JSON.stringify(gradeGerada));
+
+            console.log('Abrindo visualizador...');
+            window.open('visualizador/Visualizador.html', '_blank');
+
+            mostrarStatus('Visualizador aberto em nova aba', 'info');
+        }
+
+        function baixarGrade() {
+            if (!gradeGerada) {
+                mostrarStatus('Nenhuma grade foi gerada ainda', 'error');
+                return;
+            }
+
+            const dataStr = JSON.stringify(gradeGerada, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            link.download = `grade_horaria_gerada_${timestamp}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+
+            mostrarStatus('Grade baixada com sucesso!', 'success');
+            console.log('Download iniciado');
+        }
+
+        // Debug helper
+        window.debugInfo = function() {
+            console.log('=== DEBUG INFO ===');
+            console.log('Dados carregados:', dadosCarregados);
+            console.log('Grade gerada:', gradeGerada);
+            console.log('Módulo WASM:', geradorModule);
+            console.log('==================');
+        };
+    </script>
+</body>
+</html>
