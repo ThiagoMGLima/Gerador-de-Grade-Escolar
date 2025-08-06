@@ -667,7 +667,11 @@ function exportarDados() {
     URL.revokeObjectURL(url);
 
     Notificacao.mostrar("Dados exportados com sucesso!", "success");
-    function gerarGradeDiretamente() {
+} // ✅ Função exportarDados termina aqui
+
+// ========== FUNÇÃO PARA GERAR GRADE DIRETAMENTE ==========
+// ⚠️ ESTA FUNÇÃO DEVE ESTAR NO ESCOPO GLOBAL (FORA DE OUTRAS FUNÇÕES)
+function gerarGradeDiretamente() {
     // Primeiro validar os dados
     if (!validarDados()) {
         Notificacao.mostrar("Corrija os erros críticos antes de gerar a grade", "error");
@@ -773,7 +777,6 @@ document.addEventListener('keydown', (e) => {
         gerarGradeDiretamente();
     }
 });
-}
 
 function exportarCodigo() {
     if (!validarDados()) {
