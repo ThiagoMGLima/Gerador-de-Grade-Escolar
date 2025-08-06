@@ -667,6 +667,112 @@ function exportarDados() {
     URL.revokeObjectURL(url);
 
     Notificacao.mostrar("Dados exportados com sucesso!", "success");
+    function gerarGradeDiretamente() {
+    // Primeiro validar os dados
+    if (!validarDados()) {
+        Notificacao.mostrar("Corrija os erros críticos antes de gerar a grade", "error");
+        return;
+    }
+
+    // Preparar dados para exportação
+    const salasNormais = dados.salas.filter(s => !s.compartilhada);
+    const turmaSalaMap = {};
+
+    dados.turmas.forEach((turma, index) => {
+        if (index < salasNormais.length) {
+            turmaSalaMap[turma.id] = salasNormais[index].id;
+        }
+    });
+
+    const exportData = {
+        metadata: {
+            exportadoEm: new Date().toISOString(),
+            versao: "2.0",
+            origem: "cadastro_direto"
+        },
+        turmas: dados.turmas.map(t => ({
+            id: t.id,
+            nome: t.nome,
+            turno: t.turno
+        })),
+        disciplinas: dados.disciplinas.map(d => ({
+            id: d.id,
+            nome: d.nome,
+            aulasPorTurma: d.cargaHoraria
+        })),
+        professores: dados.professores.map(p => ({
+            id: p.id,
+            nome: p.nome,
+            idDisciplina: p.disciplinaId,
+            disponibilidade: p.disponibilidade
+        })),
+        salas: dados.salas.map(s => ({
+            id: s.id,
+            nome: s.nome,
+            tipo: s.tipo,
+            compartilhada: s.compartilhada,
+            capacidade: s.capacidade
+        })),
+        associacoes: {
+            turmaSala: turmaSalaMap
+        }
+    };
+
+    // Salvar no sessionStorage para a próxima página
+    sessionStorage.setItem('dadosGradeTemp', JSON.stringify(exportData));
+
+    // Mostrar modal de confirmação
+    const modal = criarModal({
+        titulo: '🚀 Gerar Grade Horária',
+        conteudo: `
+            <div style="text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 20px;">⚙️</div>
+                <h4>Seus dados estão prontos!</h4>
+                <p>Você será redirecionado para o gerador de grade horária.</p>
+                <br>
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <strong>Dados que serão processados:</strong><br>
+                    ✓ ${dados.turmas.length} turmas<br>
+                    ✓ ${dados.disciplinas.length} disciplinas<br>
+                    ✓ ${dados.professores.length} professores<br>
+                    ✓ ${dados.salas.length} salas
+                </div>
+                <p style="color: #666; font-size: 0.9em;">
+                    Seus dados foram salvos automaticamente e estarão disponíveis na próxima tela.
+                </p>
+            </div>
+        `,
+        botoes: [
+            {
+                texto: 'Cancelar',
+                classe: 'btn-secondary',
+                acao: () => modal.fechar()
+            },
+            {
+                texto: '🚀 Continuar para Geração',
+                classe: 'btn-success',
+                acao: () => {
+                    modal.fechar();
+                    // Salvar também no localStorage como backup
+                    localStorage.setItem('ultimosDadosCadastrados', JSON.stringify(dados));
+
+                    // Redirecionar para o sistema integrado
+                    window.location.href = '../sistemaIntegrado.html';
+                }
+            }
+        ]
+    });
+
+    modal.abrir();
+}
+
+// Adicionar atalho Ctrl+G para gerar grade
+document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === 'g') {
+        e.preventDefault();
+        gerarGradeDiretamente();
+    }
+});
 }
 
 function exportarCodigo() {

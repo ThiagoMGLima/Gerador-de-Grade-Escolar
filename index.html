@@ -453,6 +453,22 @@
                 container.appendChild(particula);
             }
         }
+        function navegarParaGeradorGrade() {
+            // Verificar se há dados no sessionStorage
+            const temDadosTemp = sessionStorage.getItem('dadosGradeTemp');
+
+            if (temDadosTemp) {
+                // Ir direto para o gerador
+                window.location.href = 'web/sistemaIntegrado.html';
+            } else {
+                // Mostrar opção
+                if (confirm('Deseja carregar dados já cadastrados?\n\nSIM - Ir para o gerador\nNÃO - Fazer novo cadastro')) {
+                    window.location.href = 'web/sistemaIntegrado.html';
+                } else {
+                    window.location.href = 'web/sistemaCadastro/sistemaCadastro.html';
+                }
+            }
+        }
 
         // Navegação
         function navegarPara(url) {
