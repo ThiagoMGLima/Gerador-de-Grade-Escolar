@@ -932,7 +932,7 @@ void GeradorHorario::exportarCSV(const std::string& nomeArquivo) const {
     log("Grade exportada para CSV: " + nomeArquivo, true);
 }
 
-// Imprimir horário melhorado
+// Imprimir horário
 void GeradorHorario::imprimirHorario() {
     std::cout << "\n=== GRADE HORÁRIA GERADA ===" << std::endl;
     const std::vector<std::string> diasNomes = { "Segunda", "Terça", "Quarta", "Quinta", "Sexta" };
