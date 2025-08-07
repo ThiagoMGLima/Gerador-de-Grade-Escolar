@@ -1,0 +1,19 @@
+# Configurações do GitHub Pages
+theme: null
+title: Sistema de Grade Horária Escolar
+description: Gerador automático de grades horárias escolares
+
+# Incluir arquivos necessários
+include:
+  - gerador.js
+  - gerador.wasm
+
+# Configurar tipos MIME corretos
+plugins:
+  - jekyll-include-cache
+
+# Headers personalizados
+headers:
+  - path: "*.wasm"
+    headers:
+      Content-Type: "application/wasm"

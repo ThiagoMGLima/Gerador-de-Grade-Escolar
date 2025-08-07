@@ -1,0 +1,58 @@
+name: Build and Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Permite executar manualmente
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v3
+
+    - name: 🔧 Setup Emscripten
+      uses: mymindstorm/setup-emsdk@v14
+      with:
+        version: 3.1.50
+        actions-cache-folder: 'emsdk-cache'
+
+    - name: 🔨 Build WebAssembly
+      run: |
+        echo "Verificando Emscripten..."
+        emcc --version
+
+        echo "Tornando script executável..."
+        chmod +x build_web.sh
+
+        echo "Compilando..."
+        ./build_web.sh
+
+        echo "Verificando arquivos gerados..."
+        ls -la docs/
+
+    - name: 📋 Copy web files to docs
+      run: |
+        # Copiar arquivos web para docs se estiverem em pasta separada
+        if [ -d "web" ]; then
+          echo "Copiando arquivos de web/ para docs/"
+          cp -r web/* docs/ 2>/dev/null || true
+        fi
+
+        # Garantir que index.html existe
+        if [ ! -f "docs/index.html" ]; then
+          echo "Copiando index.html"
+          cp index.html docs/ 2>/dev/null || true
+        fi
+
+    - name: 🚀 Deploy to GitHub Pages
+      if: github.ref == 'refs/heads/main'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs
+        force_orphan: true

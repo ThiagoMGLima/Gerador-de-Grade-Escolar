@@ -147,3 +147,10 @@ let dadosCarregados = null;
 
             mostrarStatus('Grade baixada com sucesso!', 'success');
         }
+        
+        if (typeof GeradorModule === 'undefined') {
+        console.error('Módulo não carregado. Tentando caminho alternativo...');
+        var script = document.createElement('script');
+        script.src = './gerador.js';
+        document.head.appendChild(script);
+    }
